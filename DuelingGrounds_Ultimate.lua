@@ -1,4 +1,4 @@
--- [[ Dueling Grounds Ultimate All-In-One Script ]] --
+-- [[ Dueling Grounds Ultimate - Weapon Proximity Parry ]] --
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -10,7 +10,7 @@ local Settings = {
     AutoParry = true,
     TargetLock = false,
     SpeedBoost = false,
-    ParryDistance = 14,
+    ParryDistance = 8, -- ระยะห่างของ "อาวุธศัตรู" ที่เข้ามาใกล้ตัวเรา (หน่วย studs)
     WalkSpeedValue = 28
 }
 
@@ -30,7 +30,7 @@ Frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 Frame.Position = UDim2.new(0.05, 0, 0.3, 0)
 Frame.Size = UDim2.new(0, 160, 0, 180)
 Frame.Active = true
-Frame.Draggable = true -- ลากย้ายตำแหน่งบนมือถือได้
+Frame.Draggable = true
 
 Title.Parent = Frame
 Title.Size = UDim2.new(1, 0, 0, 30)
@@ -77,39 +77,57 @@ local function getClosestEnemy()
             end
         end
     end
-    return closest, shortestDist
+    return closest
 end
 
--- 3. ระบบ Auto Parry (กด F บล็อกอัตโนมัติ)
+-- 3. ระบบจำลองการกดปุ่ม Parry (กด F)
+local lastParryTime = 0
 local function triggerParry()
-    if keypress then
-        keypress(0x46) -- Virtual Key F
-        task.wait(0.05)
-        keyrelease(0x46)
+    -- ป้องกันการกด Parry รัวเกินไป (Cooldown 0.3 วิ)
+    if tick() - lastParryTime > 0.3 then
+        lastParryTime = tick()
+        if keypress then
+            keypress(0x46) -- Virtual Key F
+            task.wait(0.05)
+            keyrelease(0x46)
+        end
     end
 end
 
+-- 4. ระบบตรวจจับตำแหน่งอาวุธศัตรูเข้าใกล้ (Weapon Proximity Auto Parry)
 RunService.Heartbeat:Connect(function()
     if not Settings.AutoParry then return end
     
-    local enemy, dist = getClosestEnemy()
-    if enemy and dist <= Settings.ParryDistance then
-        local animator = enemy.Humanoid:FindFirstChildOfClass("Animator")
-        if animator then
-            for _, track in pairs(animator:GetPlayingAnimationTracks()) do
-                -- ตรวจจับ Animation การเงื้อดาบ/โจมตี
-                if track.IsPlaying and track.TimePosition < 0.35 then
-                    triggerParry()
-                    break
-                end
+    local myChar = LocalPlayer.Character
+    if not myChar or not myChar:FindFirstChild("HumanoidRootPart") then return end
+    
+    local enemy = getClosestEnemy()
+    if enemy then
+        -- หาวัตถุที่เป็นอาวุธ (Tool / Weapon / Handle) ในตัวศัตรู
+        local weapon = enemy:FindFirstChildOfClass("Tool") or enemy:FindFirstChild("Weapon") or enemy:FindFirstChild("Blade")
+        local weaponPart = nil
+
+        if weapon then
+            weaponPart = weapon:FindFirstChild("Handle") or weapon:FindFirstChildOfClass("MeshPart") or weapon:FindFirstChildOfClass("Part")
+        else
+            -- ถ้าไม่พบ Tool ให้เช็กที่มือขวาของศัตรู ( Right Hand / RightArm )
+            weaponPart = enemy:FindFirstChild("RightHand") or enemy:FindFirstChild("Right Arm")
+        end
+
+        -- ถ้าเจออาวุธหรือมือศัตรู ให้คำนวณระยะห่างกับตัวเรา
+        if weaponPart then
+            local distanceToWeapon = (weaponPart.Position - myChar.HumanoidRootPart.Position).Magnitude
+            
+            -- เมื่ออาวุธศัตรูเข้าใกล้ตัวเราเกินระยะที่กำหนด สั่ง Parry ทันที
+            if distanceToWeapon <= Settings.ParryDistance then
+                triggerParry()
             end
         end
     end
 end)
 
--- 4. ระบบ Target Lock (หันกล้องหาศัตรู) & Speed Boost
+-- 5. ระบบ Target Lock (หันกล้องหาศัตรู) & Speed Boost
 RunService.RenderStepped:Connect(function()
-    -- หันกล้อง
     if Settings.TargetLock then
         local enemy = getClosestEnemy()
         if enemy and enemy:FindFirstChild("HumanoidRootPart") then
@@ -117,13 +135,12 @@ RunService.RenderStepped:Connect(function()
         end
     end
     
-    -- เพิ่มความเร็ว
     if Settings.SpeedBoost and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
         LocalPlayer.Character.Humanoid.WalkSpeed = Settings.WalkSpeedValue
     end
 end)
 
--- 5. ระบบปุ่มกด Event Listeners
+-- 6. ระบบปุ่มกด UI Event Listeners
 ParryBtn.MouseButton1Click:Connect(function()
     Settings.AutoParry = not Settings.AutoParry
     ParryBtn.Text = "Auto Parry: " .. (Settings.AutoParry and "ON" or "OFF")
