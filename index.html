@@ -78,7 +78,28 @@ function copyScript() {
         alert("ไม่สามารถคัดลอกได้ กรุณาลองใหม่อีกครั้ง");
     });
 }
-</script>
+</style>
+</head>
+<body>
 
-</body>
-</html>
+<div class="card">
+    <h2>⚔️ Dueling Grounds Ultimate ⚔️</h2>
+    <p>กดปุ่มด้านล่างเพื่อคัดลอกสคริปต์ นำไปวางใน Delta Executor ได้เลย!</p>
+    
+    <button class="btn" onclick="copyScript()">📋 กดเพื่อคัดลอกสคริปต์ (Copy Script)</button>
+    
+    <div class="footer">Powered by oop280712-design</div>
+</div>
+
+<script>
+function copyScript() {
+    var scriptText = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/oop280712-design/my-cloud-app/main/.lua"))()';
+    navigator.clipboard.writeText(scriptText).then(function() {
+        alert("คัดลอกสคริปต์เรียบร้อยแล้ว! นำไปวางใน Delta ได้เลย");
+    }, function() {
+        alert("ไม่สามารถคัดลอกได้ กรุณาลองใหม่อีกครั้ง");
+    });
+}
+    </script>
+         <body>
+  <html>
