@@ -39,10 +39,14 @@
         .forest-title {
             color: #2ecc71;
         }
+        .gem-title {
+            color: #00d2d3;
+        }
         p {
             color: #bbb;
             font-size: 13px;
             margin-bottom: 15px;
+            line-height: 1.4;
         }
         .btn {
             background-color: #f39c12;
@@ -58,6 +62,9 @@
         }
         .btn-forest {
             background-color: #27ae60;
+        }
+        .btn-gem {
+            background-color: #01a3a4;
         }
         .btn:active {
             opacity: 0.8;
@@ -81,11 +88,18 @@
         <button class="btn" onclick="copyDuelingScript()">📋 คัดลอกสคริปต์ Dueling Grounds</button>
     </div>
 
-    <!-- Card 2: 99 Nights in the Forest -->
+    <!-- Card 2: 99 Nights in the Forest Main Script -->
     <div class="card">
         <h2 class="forest-title">🌲 99 Nights in the Forest</h2>
         <p>สคริปต์ 99 ใน the forest (God Heal, ไม่หนาวตาย, ออโต้ตัดไม้, ดึงของ)</p>
         <button class="btn btn-forest" onclick="copyForestScript()">📋 คัดลอกสคริปต์ 99 Forest</button>
+    </div>
+
+    <!-- Card 3: 99 Forest Auto Gem Farm & Server Hop Loop -->
+    <div class="card">
+        <h2 class="gem-title">💎 99 Forest: Auto Gem Hop Loop</h2>
+        <p>รันครั้งเดียวใน Delta ระบบจะดึงเพชรในแมพทั้งหมด แล้ววาร์ปย้ายเซิร์ฟเวอร์เพื่อเก็บเพชรต่อให้อัตโนมัติเรื่อยๆ</p>
+        <button class="btn btn-gem" onclick="copyGemScript()">📋 คัดลอกสคริปต์ Auto Gem Hop</button>
     </div>
 
     <div class="footer">Powered by oop280712-design</div>
@@ -96,26 +110,24 @@
 function copyDuelingScript() {
     var scriptText = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/oop280712-design/my-cloud-app/main/DuelingGrounds_Ultimate.lua"))()';
     navigator.clipboard.writeText(scriptText).then(function() {
-        alert("คัดลอกสคริปต์ Dueling Grounds เรียบร้อยแล้ว! นำไปวางใน Delta ได้เลย");
-    }, function() {
-        alert("ไม่สามารถคัดลอกได้ กรุณาลองใหม่อีกครั้ง");
-    });
-}
-
-function copydiamondForestScript() {
-    var scriptText = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/oop280712-design/my-cloud-app/main/99 nightintheforest.lua"))()';
-    navigator.clipboard.writeText(scriptText).then(function() {
-        alert("คัดลอกสคริปต์ 99 Forest เรียบร้อยแล้ว! นำไปวางใน Delta ได้เลย");
-    }, function() {
-        alert("ไม่สามารถคัดลอกได้ กรุณาลองใหม่อีกครั้ง");
+        alert("คัดลอกสคริปต์ Dueling Grounds เรียบร้อยแล้ว!");
     });
 }
 
 function copyForestScript() {
-    var scriptText = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/oop280712-design/my-cloud-app/main/99_gems.lua"))()';
+    var scriptText = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/oop280712-design/my-cloud-app/main/99.lua"))()';
     navigator.clipboard.writeText(scriptText).then(function() {
-        alert("คัดลอกสคริปต์ 99 Forest เรียบร้อยแล้ว! นำไปวางใน Delta ได้เลย");
-    }, function() {
-        alert("ไม่สามารถคัดลอกได้ กรุณาลองใหม่อีกครั้ง");
+        alert("คัดลอกสคริปต์ 99 Forest เรียบร้อยแล้ว!");
     });
 }
+
+function copyGemScript() {
+    var scriptText = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/oop280712-design/my-cloud-app/main/99_gems.lua"))()';
+    navigator.clipboard.writeText(scriptText).then(function() {
+        alert("คัดลอกสคริปต์ Auto Gem Hop เรียบร้อยแล้ว!");
+    });
+}
+</script>
+
+</body>
+</html>
