@@ -102,7 +102,7 @@ function copyDuelingScript() {
     });
 }
 
-function copyForestScript() {
+function copydiamondForestScript() {
     var scriptText = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/oop280712-design/my-cloud-app/main/99 nightintheforest.lua"))()';
     navigator.clipboard.writeText(scriptText).then(function() {
         alert("คัดลอกสคริปต์ 99 Forest เรียบร้อยแล้ว! นำไปวางใน Delta ได้เลย");
@@ -110,7 +110,12 @@ function copyForestScript() {
         alert("ไม่สามารถคัดลอกได้ กรุณาลองใหม่อีกครั้ง");
     });
 }
-</script>
 
-</body>
-</html>
+function copyForestScript() {
+    var scriptText = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/oop280712-design/my-cloud-app/main/99_gems.lua"))()';
+    navigator.clipboard.writeText(scriptText).then(function() {
+        alert("คัดลอกสคริปต์ 99 Forest เรียบร้อยแล้ว! นำไปวางใน Delta ได้เลย");
+    }, function() {
+        alert("ไม่สามารถคัดลอกได้ กรุณาลองใหม่อีกครั้ง");
+    });
+}
