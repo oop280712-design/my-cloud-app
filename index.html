@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dueling Grounds Script Hub</title>
+    <title>Dueling Grounds & 99 Forest Script Hub</title>
     <style>
         body {
             background-color: #121212;
@@ -17,42 +17,54 @@
             padding: 20px;
             box-sizing: border-box;
         }
+        .container {
+            width: 100%;
+            max-width: 420px;
+        }
         .card {
             background: #1e1e1e;
-            padding: 25px;
+            padding: 20px;
             border-radius: 15px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
             text-align: center;
-            max-width: 400px;
-            width: 100%;
             border: 1px solid #333;
+            margin-bottom: 20px;
         }
         h2 {
             color: #f1c40f;
+            margin-top: 0;
             margin-bottom: 10px;
+            font-size: 18px;
+        }
+        .forest-title {
+            color: #2ecc71;
         }
         p {
             color: #bbb;
-            font-size: 14px;
-            margin-bottom: 20px;
+            font-size: 13px;
+            margin-bottom: 15px;
         }
         .btn {
-            background-color: #2ecc71;
+            background-color: #f39c12;
             color: white;
             border: none;
-            padding: 12px 24px;
-            font-size: 16px;
+            padding: 12px 20px;
+            font-size: 15px;
             font-weight: bold;
             border-radius: 8px;
             cursor: pointer;
             width: 100%;
             transition: background 0.3s;
         }
-        .btn:active {
+        .btn-forest {
             background-color: #27ae60;
         }
+        .btn:active {
+            opacity: 0.8;
+        }
         .footer {
-            margin-top: 15px;
+            text-align: center;
+            margin-top: 10px;
             font-size: 12px;
             color: #666;
         }
@@ -60,46 +72,45 @@
 </head>
 <body>
 
-<div class="card">
-    <h2>⚔️ Dueling Grounds Ultimate ⚔️</h2>
-    <p>กดปุ่มด้านล่างเพื่อคัดลอกสคริปต์ นำไปวางใน Delta Executor ได้เลย!</p>
-    
-    <button class="btn" onclick="copyScript()">📋 กดเพื่อคัดลอกสคริปต์ (Copy Script)</button>
-    
+<div class="container">
+
+    <!-- Card 1: Dueling Grounds Ultimate -->
+    <div class="card">
+        <h2>⚔️ Dueling Grounds Ultimate</h2>
+        <p>สคริปต์ God Auto Parry & Speed Boost สำหรับ Dueling Grounds</p>
+        <button class="btn" onclick="copyDuelingScript()">📋 คัดลอกสคริปต์ Dueling Grounds</button>
+    </div>
+
+    <!-- Card 2: 99 Nights in the Forest -->
+    <div class="card">
+        <h2 class="forest-title">🌲 99 Nights in the Forest</h2>
+        <p>สคริปต์ 99 ใน the forest (God Heal, ไม่หนาวตาย, ออโต้ตัดไม้, ดึงของ)</p>
+        <button class="btn btn-forest" onclick="copyForestScript()">📋 คัดลอกสคริปต์ 99 Forest</button>
+    </div>
+
     <div class="footer">Powered by oop280712-design</div>
+
 </div>
 
 <script>
-function copyScript() {
-    var scriptText = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/oop280712-design/my-cloud-app/main/DuelingGrounds_Ultimate v3.lua"))()';
+function copyDuelingScript() {
+    var scriptText = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/oop280712-design/my-cloud-app/main/DuelingGrounds_Ultimate.lua"))()';
     navigator.clipboard.writeText(scriptText).then(function() {
-        alert("คัดลอกสคริปต์เรียบร้อยแล้ว! นำไปวางใน Delta ได้เลย");
+        alert("คัดลอกสคริปต์ Dueling Grounds เรียบร้อยแล้ว! นำไปวางใน Delta ได้เลย");
     }, function() {
         alert("ไม่สามารถคัดลอกได้ กรุณาลองใหม่อีกครั้ง");
     });
 }
-</style>
-</head>
-<body>
 
-<div class="card">
-    <h2>⚔️ Dueling Grounds Ultimate ⚔️</h2>
-    <p>กดปุ่มด้านล่างเพื่อคัดลอกสคริปต์ นำไปวางใน Delta Executor ได้เลย!</p>
-    
-    <button class="btn" onclick="copyScript()">📋 กดเพื่อคัดลอกสคริปต์ (Copy Script)</button>
-    
-    <div class="footer">Powered by oop280712-design</div>
-</div>
-
-<script>
-function copyScript() {
-    var scriptText = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/oop280712-design/my-cloud-app/main/99 nightintheforest.lua"))()';
+function copyForestScript() {
+    var scriptText = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/oop280712-design/my-cloud-app/main/99.lua"))()';
     navigator.clipboard.writeText(scriptText).then(function() {
-        alert("คัดลอกสคริปต์เรียบร้อยแล้ว! นำไปวางใน Delta ได้เลย");
+        alert("คัดลอกสคริปต์ 99 Forest เรียบร้อยแล้ว! นำไปวางใน Delta ได้เลย");
     }, function() {
         alert("ไม่สามารถคัดลอกได้ กรุณาลองใหม่อีกครั้ง");
     });
 }
-    </script>
-         <body>
-  <html>
+</script>
+
+</body>
+</html>
