@@ -1,4 +1,4 @@
--- [[ 99 Nights in the Forest: Auto Gem Magnet & Server Hop Loop (Fixed Error 773) ]] --
+-- [[ 99 Nights in the Forest: Auto Gem Magnet & Safe Server Hop ]] --
 
 local Players = game:GetService("Players")
 local TeleportService = game:GetService("TeleportService")
@@ -6,9 +6,8 @@ local HttpService = game:GetService("HttpService")
 local LocalPlayer = Players.LocalPlayer
 
 local PlaceId = game.PlaceId
-local JobId = game.JobId
 
--- ระบบ Auto Queue สำหรับ Delta Executor
+-- ระบบ Auto Queue สำหรับ Delta Executor ให้รันต่อเมื่อย้ายเซิร์ฟเวอร์สำเร็จ
 if queue_on_teleport then
     queue_on_teleport([[
         loadstring(game:HttpGet("https://raw.githubusercontent.com/oop280712-design/my-cloud-app/main/99_gems.lua"))()
@@ -31,47 +30,57 @@ local function bringGems()
     end
 end
 
--- ฟังก์ชัน Hop เซิร์ฟเวอร์แบบปลอดภัย (ป้องกัน Error 773)
-local function safeServerHop()
-    print("กำลังสแกนหาเซิร์ฟเวอร์ใหม่...")
+-- ฟังก์ชันย้ายเซิร์ฟเวอร์แบบปลอดภัยไม่ติด Error 773
+local function safeHop()
+    print("🔄 กำลังเตรียมย้ายเซิร์ฟเวอร์...")
     
-    local api = "https://games.roblox.com/v1/games/" .. PlaceId .. "/servers/Public?sortOrder=Desc&limit=100"
-    local success, result = pcall(function()
-        return HttpService:JSONDecode(game:HttpGet(api))
-    end)
-
-    if success and result and result.data then
-        for _, server in pairs(result.data) do
-            -- ย้ายไปเซิร์ฟที่มีคนเล่น และไม่ใช่เซิร์ฟเดิม
-            if server.id ~= JobId and server.playing < server.maxPlayers and server.playing > 0 then
-                pcall(function()
-                    TeleportService:TeleportToPlaceInstance(PlaceId, server.id, LocalPlayer)
-                end)
-                task.wait(2)
+    -- ดึงรายการ Public Server ล่าสุด
+    local servers = {}
+    local req = pcall(function()
+        local res = HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/" .. PlaceId .. "/servers/Public?sortOrder=Asc&limit=100"))
+        if res and res.data then
+            for _, v in pairs(res.data) do
+                if v.playing and v.maxPlayers and v.playing < v.maxPlayers and v.id ~= game.JobId then
+                    table.insert(servers, v.id)
+                end
             end
         end
+    end)
+
+    if #servers > 0 then
+        -- สุ่มเลือกเซิร์ฟเวอร์ที่ไม่ใช่เซิร์ฟเวอร์เดิม
+        local randomServerId = servers[math.random(1, #servers)]
+        TeleportService:TeleportToPlaceInstance(PlaceId, randomServerId, LocalPlayer)
+    else
+        -- ถ้าดึงรายชื่อไม่สำเร็จ ให้ใช้ระบบวาร์ปปกติของ Roblox
+        TeleportService:Teleport(PlaceId, LocalPlayer)
     end
-    
-    -- ถ้าย้ายเจาะจงไม่ผ่าน ให้ย้ายแบบสุ่มสแตนดาร์ด
-    TeleportService:Teleport(PlaceId, LocalPlayer)
 end
 
 -- เริ่มทำงาน
 task.spawn(function()
-    -- รอให้เกมโหลดตัวละครเสร็จสมบูรณ์ก่อน
-    repeat task.wait(0.5) until LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    -- รอให้ตัวละครโหลดสมบูรณ์ก่อน
+    repeat task.wait(1) until LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
     
-    print("💎 เริ่มต้นกวาดเพชร...")
+    print("💎 เริ่มต้นระบบกวาดเพชร...")
+    task.wait(2) -- รอไอเทมในแมพโหลดครบ
     
-    -- หน่วงเวลาเล็กน้อยให้เพชรในเซิร์ฟเวอร์โหลดขึ้นมาครบ
-    task.wait(1.5)
-    
-    for i = 1, 10 do
+    -- กวาดเพชรเข้าตัว
+    for i = 1, 15 do
         bringGems()
         task.wait(0.2)
     end
 
-    print("✅ กวาดเพชรเสร็จแล้ว กำลังย้ายเซิร์ฟเวอร์...")
+    print("✅ กวาดเพชรเรียบร้อย! กำลังย้ายเซิร์ฟเวอร์เพื่อฟาร์มต่อ...")
     task.wait(1)
-    safeServerHop()
+    
+    -- พยายามย้ายเซิร์ฟเวอร์แบบปลอดภัย
+    local success, err = pcall(function()
+        safeHop()
+    end)
+    
+    if not success then
+        warn("ย้ายแบบปกติไม่สำเร็จ กำลังวาร์ปสุ่มแทน:", err)
+        TeleportService:Teleport(PlaceId, LocalPlayer)
+    end
 end)
