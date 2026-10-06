@@ -36,12 +36,9 @@
             margin-bottom: 10px;
             font-size: 18px;
         }
-        .forest-title {
-            color: #2ecc71;
-        }
-        .gem-title {
-            color: #00d2d3;
-        }
+        .forest-title { color: #2ecc71; }
+        .gem-title { color: #00d2d3; }
+        .egg-title { color: #e67e22; }
         p {
             color: #bbb;
             font-size: 13px;
@@ -60,15 +57,10 @@
             width: 100%;
             transition: background 0.3s;
         }
-        .btn-forest {
-            background-color: #27ae60;
-        }
-        .btn-gem {
-            background-color: #01a3a4;
-        }
-        .btn:active {
-            opacity: 0.8;
-        }
+        .btn-forest { background-color: #27ae60; }
+        .btn-gem { background-color: #01a3a4; }
+        .btn-egg { background-color: #d35400; }
+        .btn:active { opacity: 0.8; }
         .footer {
             text-align: center;
             margin-top: 10px;
@@ -88,18 +80,25 @@
         <button class="btn" onclick="copyDuelingScript()">📋 คัดลอกสคริปต์ Dueling Grounds</button>
     </div>
 
-    <!-- Card 2: 99 Nights in the Forest Main Script -->
+    <!-- Card 2: 99 Nights in the Forest -->
     <div class="card">
         <h2 class="forest-title">🌲 99 Nights in the Forest</h2>
         <p>สคริปต์ 99 ใน the forest (God Heal, ไม่หนาวตาย, ออโต้ตัดไม้, ดึงของ)</p>
         <button class="btn btn-forest" onclick="copyForestScript()">📋 คัดลอกสคริปต์ 99 Forest</button>
     </div>
 
-    <!-- Card 3: 99 Forest Auto Gem Farm & Server Hop Loop -->
+    <!-- Card 3: 99 Forest Auto Gem Hop -->
     <div class="card">
-        <h2 class="gem-title">💎 99 Forest: Auto Gem Hop Loop</h2>
-        <p>รันครั้งเดียวใน Delta ระบบจะดึงเพชรในแมพทั้งหมด แล้ววาร์ปย้ายเซิร์ฟเวอร์เพื่อเก็บเพชรต่อให้อัตโนมัติเรื่อยๆ</p>
-        <button class="btn btn-gem" onclick="copyGemScript()">📋 คัดลอกสคริปต์ Auto Gem Hop</button>
+        <h2 class="gem-title">💎 99 Forest: Instant Gem Pull</h2>
+        <p>ดึงเพชรเข้าตัวทันทีในแมพ พร้อมสวิตช์วาร์ปย้ายเกมให้อัตโนมัติ</p>
+        <button class="btn btn-gem" onclick="copyGemScript()">📋 คัดลอกสคริปต์ ดึงเพชร</button>
+    </div>
+
+    <!-- Card 4: Steal Eggs Hub -->
+    <div class="card">
+        <h2 class="egg-title">🥚 Steal Eggs Hub</h2>
+        <p>สคริปต์แมพขโมยไข่ (Auto Steal Eggs, วิ่งเร็ว, กระโดดสูง)</p>
+        <button class="btn btn-egg" onclick="copyEggScript()">📋 คัดลอกสคริปต์ ขโมยไข่</button>
     </div>
 
     <div class="footer">Powered by oop280712-design</div>
@@ -109,23 +108,22 @@
 <script>
 function copyDuelingScript() {
     var scriptText = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/oop280712-design/my-cloud-app/main/DuelingGrounds_Ultimate.lua"))()';
-    navigator.clipboard.writeText(scriptText).then(function() {
-        alert("คัดลอกสคริปต์ Dueling Grounds เรียบร้อยแล้ว!");
-    });
+    navigator.clipboard.writeText(scriptText).then(function() { alert("คัดลอกสคริปต์ Dueling Grounds เรียบร้อยแล้ว!"); });
 }
 
 function copyForestScript() {
     var scriptText = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/oop280712-design/my-cloud-app/main/99.lua"))()';
-    navigator.clipboard.writeText(scriptText).then(function() {
-        alert("คัดลอกสคริปต์ 99 Forest เรียบร้อยแล้ว!");
-    });
+    navigator.clipboard.writeText(scriptText).then(function() { alert("คัดลอกสคริปต์ 99 Forest เรียบร้อยแล้ว!"); });
 }
 
 function copyGemScript() {
     var scriptText = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/oop280712-design/my-cloud-app/main/99_gems.lua"))()';
-    navigator.clipboard.writeText(scriptText).then(function() {
-        alert("คัดลอกสคริปต์ Auto Gem Hop เรียบร้อยแล้ว!");
-    });
+    navigator.clipboard.writeText(scriptText).then(function() { alert("คัดลอกสคริปต์ Auto Gem Hop เรียบร้อยแล้ว!"); });
+}
+
+function copyEggScript() {
+    var scriptText = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/oop280712-design/my-cloud-app/main/steal_eggs.lua"))()';
+    navigator.clipboard.writeText(scriptText).then(function() { alert("คัดลอกสคริปต์ขโมยไข่เรียบร้อยแล้ว!"); });
 }
 </script>
 
