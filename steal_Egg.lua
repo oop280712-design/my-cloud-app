@@ -1,170 +1,146 @@
--- [[ Steal Eggs: Red & Bio Egg Sniper Hub ]] --
+-- [[ Steal Eggs: Light-Speed Boss & Red Egg Sniper ]] --
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-local TweenService = game:GetService("TweenService")
 local LocalPlayer = Players.LocalPlayer
 
 local Settings = {
-    SelectedTier = "Red/Gold", -- ตัวเลือก: "All", "Red/Gold", "Bio/NewZone"
-    TargetPlayer = "",
+    SelectedTier = "Red/Gold", -- ตัวเลือก: "All", "Red/Gold", "Boss/Bio"
+    TargetBoss = "All Bosses",  -- เลือกบอสเป้าหมาย
     MyBaseCFrame = nil,
-    FlySpeed = 120,
-    IsStealing = false,
-    SnipeOnReset = true -- สวิตช์เล็งไข่ตอนรีเซ็ตแมพ
+    AutoRedNight = false,      -- สวิตช์เร่งไข่แดงตอนกลางคืน/รีเซ็ต
+    IsStealing = false
 }
 
--- บันทึกตำแหน่งฐานเริ่มต้น
+-- เซ็ตจุดฐานอ้างอิง
 if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
     Settings.MyBaseCFrame = LocalPlayer.Character.HumanoidRootPart.CFrame
 end
 
--- ฟังก์ชันบินไป-กลับรวดเร็ว
-local function fastFlyTo(targetCFrame, speed)
+-- ฟังก์ชันเคลื่อนที่ความเร็วแสง (Instant CFrame Teleport)
+local function lightSpeedMove(targetCFrame)
     local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-    if not hrp then return end
-    
-    local distance = (hrp.Position - targetCFrame.Position).Magnitude
-    local duration = distance / speed
-    
-    local tweenInfo = TweenInfo.new(duration, Enum.EasingStyle.Linear)
-    local tween = TweenService:Create(hrp, tweenInfo, {CFrame = targetCFrame})
-    tween:Play()
-    tween.Completed:Wait()
+    if hrp and targetCFrame then
+        hrp.CFrame = targetCFrame
+    end
 end
 
--- ฟังก์ชันค้นหาไข่ตามระดับที่เลือก (รวมถึงโซนไบโอใหม่)
-local function findEggByTier()
+-- ค้นหาไข่ตามระดับและตามบอสที่เลือก
+local function scanEggs()
+    local matchedEggs = {}
+    
     for _, obj in pairs(workspace:GetDescendants()) do
         if obj:IsA("BasePart") or obj:IsA("Model") or obj:IsA("MeshPart") then
             local name = obj.Name:lower()
-            if name:find("egg") or name:find("ไข่") then
-                local isMatch = false
+            local parentName = obj.Parent and obj.Parent.Name:lower() or ""
+            
+            if name:find("egg") or name:find("ไข่") or name:find("pod") then
+                local isTierOK = false
+                local isBossOK = false
                 
+                -- 1. กรองระดับไข่
                 if Settings.SelectedTier == "All" then
-                    isMatch = true
+                    isTierOK = true
                 elseif Settings.SelectedTier == "Red/Gold" then
                     if name:find("red") or name:find("gold") or name:find("rare") or name:find("แดง") or name:find("ทอง") then
-                        isMatch = true
+                        isTierOK = true
                     end
-                elseif Settings.SelectedTier == "Bio/NewZone" then
-                    -- ตรวจจับไข่โซนไบโอใหม่ / Bio / Cyber / Mutant / Alien / Event
-                    if name:find("bio") or name:find("biome") or name:find("mutant") or name:find("cyber") or name:find("alien") or name:find("toxic") then
-                        isMatch = true
+                elseif Settings.SelectedTier == "Boss/Bio" then
+                    if name:find("boss") or name:find("bio") or name:find("cyber") or name:find("mythic") or name:find("event") then
+                        isTierOK = true
                     end
                 end
-
-                if isMatch then
-                    if Settings.TargetPlayer ~= "" then
-                        local targetChar = workspace:FindFirstChild(Settings.TargetPlayer)
-                        if targetChar and targetChar:FindFirstChild("HumanoidRootPart") then
-                            local dist = (obj:GetPivot().Position - targetChar.HumanoidRootPart.Position).Magnitude
-                            if dist < 60 then return obj end
-                        end
-                    else
-                        return obj
+                
+                -- 2. กรองตามบอส
+                if Settings.TargetBoss == "All Bosses" then
+                    isBossOK = true
+                else
+                    if parentName:find(Settings.TargetBoss:lower()) or name:find(Settings.TargetBoss:lower()) then
+                        isBossOK = true
                     end
+                end
+                
+                if isTierOK and isBossOK then
+                    table.insert(matchedEggs, obj)
                 end
             end
         end
     end
-    return nil
+    return matchedEggs
 end
 
--- ฟังก์ชันรันการขโมยไข่ 1 รอบ
-local function executeSteal()
+-- ฟังก์ชันขโมยด้วยความเร็วแสงแล้วพา กลับฐานด่วน
+local function executeInstantSteal()
     if Settings.IsStealing then return end
-    local targetEgg = findEggByTier()
+    local eggs = scanEggs()
     
-    if targetEgg then
+    if #eggs > 0 then
         Settings.IsStealing = true
-        print("🚀 พุ่งไปฉกไข่เป้าหมาย...")
+        local target = eggs[1]
+        local targetCFrame = target:IsA("Model") and target:GetPivot() or target.CFrame
         
-        local eggCFrame = targetEgg:IsA("Model") and targetEgg:GetPivot() or targetEgg.CFrame
+        -- 1. วาร์ปความเร็วแสงไปหาไข่
+        lightSpeedMove(targetCFrame + Vector3.new(0, 2, 0))
+        task.wait(0.05)
         
-        -- 1. ลอยไปชนและเก็บไข่
-        fastFlyTo(eggCFrame + Vector3.new(0, 2, 0), Settings.FlySpeed)
-        task.wait(0.15)
+        -- 2. ดึงไข่เข้าตัว
+        pcall(function()
+            if target:IsA("BasePart") then
+                target.CFrame = LocalPlayer.Character.HumanoidRootPart.CFrame
+            end
+        end)
         
-        if targetEgg:IsA("BasePart") then
-            targetEgg.CFrame = LocalPlayer.Character.HumanoidRootPart.CFrame
-        end
-        
-        -- 2. พาไข่บินกลับฐานด่วน
+        -- 3. วาร์ปกลับฐานด่วนทันที
         if Settings.MyBaseCFrame then
-            print("🏃‍♂️ บินพาไข่กลับฐานด่วน!")
-            fastFlyTo(Settings.MyBaseCFrame + Vector3.new(0, 3, 0), Settings.FlySpeed)
+            lightSpeedMove(Settings.MyBaseCFrame + Vector3.new(0, 3, 0))
         end
         
         Settings.IsStealing = false
     end
 end
 
--- ตรวจจับการรีเซ็ตแมพ / ไข่เกิดใหม่
+-- สวิตช์ตรวจจับไข่แดงเกิด / กลางคืนรีเซ็ต
 workspace.ChildAdded:Connect(function(child)
-    if Settings.SnipeOnReset then
+    if Settings.AutoRedNight then
         local name = child.Name:lower()
-        if name:find("egg") or name:find("ไข่") then
-            task.wait(0.1)
-            executeSteal()
+        if name:find("egg") or name:find("red") or name:find("แดง") then
+            task.wait(0.05)
+            executeInstantSteal()
         end
     end
 end)
 
--- UI หน้าต่างควบคุมในมือถือ
+-- UI เมนูแบบใหม่ รองรับ Delta และป้องกันปัญหาวนลูป
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "EggSniperProGUI"
+ScreenGui.Name = "CleanEggHub"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 250, 0, 310)
+MainFrame.Size = UDim2.new(0, 250, 0, 280)
 MainFrame.Position = UDim2.new(0.05, 0, 0.25, 0)
-MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+MainFrame.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
 MainFrame.Active = true
 MainFrame.Draggable = true
 MainFrame.Parent = ScreenGui
 
-local UICorner = Instance.new("UICorner")
-UICorner.CornerRadius = UDim.new(0, 10)
-UICorner.Parent = MainFrame
+Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
 
 local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, 0, 0, 35)
-Title.Text = "🥚 ULTRA EGG SNIPER V3"
+Title.Text = "⚡ STEAL EGGS (DELTA EDITION)"
 Title.TextColor3 = Color3.fromRGB(241, 196, 15)
-Title.TextSize = 14
+Title.TextSize = 13
 Title.Font = Enum.Font.SourceSansBold
 Title.BackgroundTransparency = 1
 Title.Parent = MainFrame
 
--- 1. ปุ่มเซ็ตฐาน
-local BaseBtn = Instance.new("TextButton")
-BaseBtn.Size = UDim2.new(0.88, 0, 0, 32)
-BaseBtn.Position = UDim2.new(0.06, 0, 0, 40)
-BaseBtn.BackgroundColor3 = Color3.fromRGB(52, 152, 219)
-BaseBtn.Text = "📍 เซ็ตตำแหน่งฐานด่วน"
-BaseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-BaseBtn.Font = Enum.Font.SourceSansBold
-BaseBtn.TextSize = 12
-BaseBtn.Parent = MainFrame
-Instance.new("UICorner", BaseBtn).CornerRadius = UDim.new(0, 6)
-
-BaseBtn.MouseButton1Click:Connect(function()
-    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        Settings.MyBaseCFrame = LocalPlayer.Character.HumanoidRootPart.CFrame
-        BaseBtn.Text = "✅ บันทึกฐานเรียบร้อย!"
-        task.wait(1)
-        BaseBtn.Text = "📍 เซ็ตตำแหน่งฐานด่วน"
-    end
-end)
-
--- 2. ปุ่มเปลี่ยนระดับไข่ที่จะขโมย (Tier Switcher)
+-- [เมนูที่ 1: เลือกระดับไข่]
 local TierBtn = Instance.new("TextButton")
 TierBtn.Size = UDim2.new(0.88, 0, 0, 32)
-TierBtn.Position = UDim2.new(0.06, 0, 0, 80)
+TierBtn.Position = UDim2.new(0.06, 0, 0, 40)
 TierBtn.BackgroundColor3 = Color3.fromRGB(155, 89, 182)
-TierBtn.Text = "🎯 ระดับไข่: [ไข่แดง/ทอง]"
+TierBtn.Text = "1. ระดับไข่: [ไข่แดง/ทอง]"
 TierBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 TierBtn.Font = Enum.Font.SourceSansBold
 TierBtn.TextSize = 12
@@ -173,64 +149,90 @@ Instance.new("UICorner", TierBtn).CornerRadius = UDim.new(0, 6)
 
 TierBtn.MouseButton1Click:Connect(function()
     if Settings.SelectedTier == "Red/Gold" then
-        Settings.SelectedTier = "Bio/NewZone"
-        TierBtn.Text = "🎯 ระดับไข่: [โซนไบโอใหม่/Bio]"
-    elseif Settings.SelectedTier == "Bio/NewZone" then
+        Settings.SelectedTier = "Boss/Bio"
+        TierBtn.Text = "1. ระดับไข่: [ไบโอม/บอส/Event]"
+    elseif Settings.SelectedTier == "Boss/Bio" then
         Settings.SelectedTier = "All"
-        TierBtn.Text = "🎯 ระดับไข่: [ทุกประเภท]"
+        TierBtn.Text = "1. ระดับไข่: [ทุกระดับ]"
     else
         Settings.SelectedTier = "Red/Gold"
-        TierBtn.Text = "🎯 ระดับไข่: [ไข่แดง/ทอง]"
+        TierBtn.Text = "1. ระดับไข่: [ไข่แดง/ทอง]"
     end
 end)
 
--- 3. ช่องกรอกชื่อเป้าหมาย
-local TargetBox = Instance.new("TextBox")
-TargetBox.Size = UDim2.new(0.88, 0, 0, 30)
-TargetBox.Position = UDim2.new(0.06, 0, 0, 120)
-TargetBox.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-TargetBox.PlaceholderText = "พิมพ์ชื่อคนที่จะไปขโมย (ถ้ามี)"
-TargetBox.Text = ""
-TargetBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-TargetBox.Font = Enum.Font.SourceSans
-TargetBox.TextSize = 12
-TargetBox.Parent = MainFrame
-Instance.new("UICorner", TargetBox).CornerRadius = UDim.new(0, 6)
+-- [เมนูที่ 2: เลือกบอสเป้าหมาย]
+local BossBtn = Instance.new("TextButton")
+BossBtn.Size = UDim2.new(0.88, 0, 0, 32)
+BossBtn.Position = UDim2.new(0.06, 0, 0, 80)
+BossBtn.BackgroundColor3 = Color3.fromRGB(52, 152, 219)
+BossBtn.Text = "2. บอสเป้าหมาย: [บอสทั้งหมด]"
+BossBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+BossBtn.Font = Enum.Font.SourceSansBold
+BossBtn.TextSize = 12
+BossBtn.Parent = MainFrame
+Instance.new("UICorner", BossBtn).CornerRadius = UDim.new(0, 6)
 
-TargetBox.FocusLost:Connect(function()
-    Settings.TargetPlayer = TargetBox.Text
+local bossList = {"All Bosses", "Dragon", "Demon", "King", "Alien", "Robot"}
+local currentBossIdx = 1
+
+BossBtn.MouseButton1Click:Connect(function()
+    currentBossIdx = currentBossIdx + 1
+    if currentBossIdx > #bossList then currentBossIdx = 1 end
+    Settings.TargetBoss = bossList[currentBossIdx]
+    BossBtn.Text = "2. บอสเป้าหมาย: [" .. Settings.TargetBoss .. "]"
 end)
 
--- 4. สวิตช์เล็งไข่ตอนรีเซ็ต (Snipe On Reset Toggle)
-local ResetToggle = Instance.new("TextButton")
-ResetToggle.Size = UDim2.new(0.88, 0, 0, 34)
-ResetToggle.Position = UDim2.new(0.06, 0, 0, 160)
-ResetToggle.BackgroundColor3 = Color3.fromRGB(46, 204, 113)
-ResetToggle.Text = "🔄 เล็งฉกไข่ตอนรีเซ็ตแมพ: ON"
-ResetToggle.TextColor3 = Color3.fromRGB(255, 255, 255)
-ResetToggle.Font = Enum.Font.SourceSansBold
-ResetToggle.TextSize = 12
-ResetToggle.Parent = MainFrame
-Instance.new("UICorner", ResetToggle).CornerRadius = UDim.new(0, 6)
+-- [สวิตช์: เร่งไข่แดงตอนกลางคืน/รีเซ็ต]
+local RedNightBtn = Instance.new("TextButton")
+RedNightBtn.Size = UDim2.new(0.88, 0, 0, 35)
+RedNightBtn.Position = UDim2.new(0.06, 0, 0, 125)
+RedNightBtn.BackgroundColor3 = Color3.fromRGB(192, 57, 43)
+RedNightBtn.Text = "🚨 เร่งไข่แดง (กลางคืน/รีเซ็ต): OFF"
+RedNightBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+RedNightBtn.Font = Enum.Font.SourceSansBold
+RedNightBtn.TextSize = 12
+RedNightBtn.Parent = MainFrame
+Instance.new("UICorner", RedNightBtn).CornerRadius = UDim.new(0, 6)
 
-ResetToggle.MouseButton1Click:Connect(function()
-    Settings.SnipeOnReset = not Settings.SnipeOnReset
-    ResetToggle.BackgroundColor3 = Settings.SnipeOnReset and Color3.fromRGB(46, 204, 113) or Color3.fromRGB(192, 57, 43)
-    ResetToggle.Text = "🔄 เล็งฉกไข่ตอนรีเซ็ตแมพ: " .. (Settings.SnipeOnReset and "ON" or "OFF")
+RedNightBtn.MouseButton1Click:Connect(function()
+    Settings.AutoRedNight = not Settings.AutoRedNight
+    RedNightBtn.BackgroundColor3 = Settings.AutoRedNight and Color3.fromRGB(46, 204, 113) or Color3.fromRGB(192, 57, 43)
+    RedNightBtn.Text = "🚨 เร่งไข่แดง (กลางคืน/รีเซ็ต): " .. (Settings.AutoRedNight and "ON" or "OFF")
 end)
 
--- 5. 🔥 ปุ่มใหญ่: กดขโมยไข่ทันที (Instant Steal)
-local ActionBtn = Instance.new("TextButton")
-ActionBtn.Size = UDim2.new(0.88, 0, 0, 42)
-ActionBtn.Position = UDim2.new(0.06, 0, 0, 205)
-ActionBtn.BackgroundColor3 = Color3.fromRGB(231, 76, 60)
-ActionBtn.Text = "⚡ กดขโมยไข่ทันที!"
-ActionBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-ActionBtn.Font = Enum.Font.SourceSansBold
-ActionBtn.TextSize = 15
-ActionBtn.Parent = MainFrame
-Instance.new("UICorner", ActionBtn).CornerRadius = UDim.new(0, 8)
+-- [ปุ่มบันทึกตำแหน่งฐาน]
+local SetBaseBtn = Instance.new("TextButton")
+SetBaseBtn.Size = UDim2.new(0.88, 0, 0, 30)
+SetBaseBtn.Position = UDim2.new(0.06, 0, 0, 170)
+SetBaseBtn.BackgroundColor3 = Color3.fromRGB(44, 62, 80)
+SetBaseBtn.Text = "📍 เซ็ตจุดฐาน (ตำแหน่งยืน)"
+SetBaseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+SetBaseBtn.Font = Enum.Font.SourceSans
+SetBaseBtn.TextSize = 11
+SetBaseBtn.Parent = MainFrame
+Instance.new("UICorner", SetBaseBtn).CornerRadius = UDim.new(0, 6)
 
-ActionBtn.MouseButton1Click:Connect(function()
-    executeSteal()
+SetBaseBtn.MouseButton1Click:Connect(function()
+    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        Settings.MyBaseCFrame = LocalPlayer.Character.HumanoidRootPart.CFrame
+        SetBaseBtn.Text = "✅ บันทึกจุดฐานแล้ว!"
+        task.wait(1)
+        SetBaseBtn.Text = "📍 เซ็ตจุดฐาน (ตำแหน่งยืน)"
+    end
+end)
+
+-- [ปุ่มกดขโมยความเร็วแสง]
+local StealBtn = Instance.new("TextButton")
+StealBtn.Size = UDim2.new(0.88, 0, 0, 40)
+StealBtn.Position = UDim2.new(0.06, 0, 0, 215)
+StealBtn.BackgroundColor3 = Color3.fromRGB(230, 126, 34)
+StealBtn.Text = "⚡ กดขโมยไข่ (ความเร็วแสง)"
+StealBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+StealBtn.Font = Enum.Font.SourceSansBold
+StealBtn.TextSize = 14
+StealBtn.Parent = MainFrame
+Instance.new("UICorner", StealBtn).CornerRadius = UDim.new(0, 8)
+
+StealBtn.MouseButton1Click:Connect(function()
+    executeInstantSteal()
 end)
