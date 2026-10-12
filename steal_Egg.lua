@@ -1,14 +1,23 @@
--- [[ Steal Eggs: Light-Speed Boss & Red Egg Sniper ]] --
+-- [[ Steal Eggs: Light-Speed Boss & Red Egg Sniper + Get Key System (VIP: Zorfije) ]] --
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 
+-- [[ ตั้งค่าระบบ Key & VIP ]] --
+local CORRECT_KEY = "SPARK-EGGS-2026"
+local KEY_LINK = "https://oop280712-design.github.io/Key-script/"
+
+-- รายชื่อผู้เล่นระดับ VIP (ข้ามการกรอก Key อัตโนมัติ)
+local VIP_USERS = {
+    ["Zorfije"] = true
+}
+
 local Settings = {
-    SelectedTier = "Red/Gold", -- ตัวเลือก: "All", "Red/Gold", "Boss/Bio"
-    TargetBoss = "All Bosses",  -- เลือกบอสเป้าหมาย
+    SelectedTier = "Red/Gold",
+    TargetBoss = "All Bosses",
     MyBaseCFrame = nil,
-    AutoRedNight = false,      -- สวิตช์เร่งไข่แดงตอนกลางคืน/รีเซ็ต
+    AutoRedNight = false,
     IsStealing = false
 }
 
@@ -28,7 +37,6 @@ end
 -- ค้นหาไข่ตามระดับและตามบอสที่เลือก
 local function scanEggs()
     local matchedEggs = {}
-    
     for _, obj in pairs(workspace:GetDescendants()) do
         if obj:IsA("BasePart") or obj:IsA("Model") or obj:IsA("MeshPart") then
             local name = obj.Name:lower()
@@ -110,9 +118,12 @@ workspace.ChildAdded:Connect(function(child)
     end
 end)
 
--- UI เมนูแบบใหม่ รองรับ Delta และป้องกันปัญหาวนลูป
+-- ================================================================= --
+-- [[ หน้าต่าง Main Hub (เมนูหลัก) ]] --
+-- ================================================================= --
+
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "CleanEggHub"
+ScreenGui.Name = "StealEggKeyHub"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
@@ -122,18 +133,19 @@ MainFrame.Position = UDim2.new(0.05, 0, 0.25, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
 MainFrame.Active = true
 MainFrame.Draggable = true
+MainFrame.Visible = false
 MainFrame.Parent = ScreenGui
 
 Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
 
-local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, 0, 0, 35)
-Title.Text = "⚡ STEAL EGGS (DELTA EDITION)"
-Title.TextColor3 = Color3.fromRGB(241, 196, 15)
-Title.TextSize = 13
-Title.Font = Enum.Font.SourceSansBold
-Title.BackgroundTransparency = 1
-Title.Parent = MainFrame
+local MainTitle = Instance.new("TextLabel")
+MainTitle.Size = UDim2.new(1, 0, 0, 35)
+MainTitle.Text = "⚡ STEAL EGGS (DELTA EDITION)"
+MainTitle.TextColor3 = Color3.fromRGB(241, 196, 15)
+MainTitle.TextSize = 13
+MainTitle.Font = Enum.Font.SourceSansBold
+MainTitle.BackgroundTransparency = 1
+MainTitle.Parent = MainFrame
 
 -- [เมนูที่ 1: เลือกระดับไข่]
 local TierBtn = Instance.new("TextButton")
@@ -236,3 +248,103 @@ Instance.new("UICorner", StealBtn).CornerRadius = UDim.new(0, 8)
 StealBtn.MouseButton1Click:Connect(function()
     executeInstantSteal()
 end)
+
+-- ================================================================= --
+-- [[ หน้าต่าง Key System & VIP Check ]] --
+-- ================================================================= --
+
+local KeyFrame = Instance.new("Frame")
+KeyFrame.Size = UDim2.new(0, 250, 0, 210)
+KeyFrame.Position = UDim2.new(0.05, 0, 0.3, 0)
+KeyFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+KeyFrame.Active = true
+KeyFrame.Draggable = true
+KeyFrame.Visible = false
+KeyFrame.Parent = ScreenGui
+
+Instance.new("UICorner", KeyFrame).CornerRadius = UDim.new(0, 10)
+
+local KeyTitle = Instance.new("TextLabel")
+KeyTitle.Size = UDim2.new(1, 0, 0, 35)
+KeyTitle.Text = "🔑 KEY SYSTEM VERIFICATION"
+KeyTitle.TextColor3 = Color3.fromRGB(46, 204, 113)
+KeyTitle.TextSize = 12
+KeyTitle.Font = Enum.Font.SourceSansBold
+KeyTitle.BackgroundTransparency = 1
+KeyTitle.Parent = KeyFrame
+
+-- ช่องกรอก Key
+local KeyBox = Instance.new("TextBox")
+KeyBox.Size = UDim2.new(0.88, 0, 0, 36)
+KeyBox.Position = UDim2.new(0.06, 0, 0, 42)
+KeyBox.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+KeyBox.PlaceholderText = "กรอก Key ตรงนี้..."
+KeyBox.Text = ""
+KeyBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+KeyBox.Font = Enum.Font.SourceSans
+KeyBox.TextSize = 13
+KeyBox.Parent = KeyFrame
+Instance.new("UICorner", KeyBox).CornerRadius = UDim.new(0, 6)
+
+-- ปุ่มคัดลอกลิงก์รับคีย์ (Get Key)
+local GetKeyBtn = Instance.new("TextButton")
+GetKeyBtn.Size = UDim2.new(0.88, 0, 0, 34)
+GetKeyBtn.Position = UDim2.new(0.06, 0, 0, 88)
+GetKeyBtn.BackgroundColor3 = Color3.fromRGB(52, 152, 219)
+GetKeyBtn.Text = "📋 คัดลอกลิงก์รับคีย์ (Get Key)"
+GetKeyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+GetKeyBtn.Font = Enum.Font.SourceSansBold
+GetKeyBtn.TextSize = 12
+GetKeyBtn.Parent = KeyFrame
+Instance.new("UICorner", GetKeyBtn).CornerRadius = UDim.new(0, 6)
+
+GetKeyBtn.MouseButton1Click:Connect(function()
+    pcall(function()
+        setclipboard(KEY_LINK)
+    end)
+    GetKeyBtn.Text = "✅ คัดลอกลิงก์รับคีย์แล้ว!"
+    task.wait(1.5)
+    GetKeyBtn.Text = "📋 คัดลอกลิงก์รับคีย์ (Get Key)"
+end)
+
+-- ปุ่มยืนยัน Key
+local CheckKeyBtn = Instance.new("TextButton")
+CheckKeyBtn.Size = UDim2.new(0.88, 0, 0, 38)
+CheckKeyBtn.Position = UDim2.new(0.06, 0, 0, 132)
+CheckKeyBtn.BackgroundColor3 = Color3.fromRGB(46, 204, 113)
+CheckKeyBtn.Text = "🔓 ยืนยัน Key"
+CheckKeyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+CheckKeyBtn.Font = Enum.Font.SourceSansBold
+CheckKeyBtn.TextSize = 14
+CheckKeyBtn.Parent = KeyFrame
+Instance.new("UICorner", CheckKeyBtn).CornerRadius = UDim.new(0, 6)
+
+CheckKeyBtn.MouseButton1Click:Connect(function()
+    if KeyBox.Text == CORRECT_KEY then
+        CheckKeyBtn.Text = "✅ Key ถูกต้อง! กำลังเปิดเมนู..."
+        CheckKeyBtn.BackgroundColor3 = Color3.fromRGB(46, 204, 113)
+        task.wait(1)
+        KeyFrame.Visible = false
+        MainFrame.Visible = true
+    else
+        CheckKeyBtn.Text = "❌ Key ไม่ถูกต้อง!"
+        CheckKeyBtn.BackgroundColor3 = Color3.fromRGB(192, 57, 43)
+        task.wait(1.5)
+        CheckKeyBtn.Text = "🔓 ยืนยัน Key"
+        CheckKeyBtn.BackgroundColor3 = Color3.fromRGB(46, 204, 113)
+    end
+end)
+
+-- ================================================================= --
+-- [[ ตรวจสอบสิทธิ์ VIP เมื่อเริ่มต้นรันสคริปต์ ]] --
+-- ================================================================= --
+
+local username = LocalPlayer.Name
+local displayName = LocalPlayer.DisplayName
+
+if VIP_USERS[username] or VIP_USERS[displayName] then
+    print("👑 ตรวจพบ VIP User: " .. username .. " - ข้ามการกรอก Key อัตโนมัติ!")
+    MainFrame.Visible = true -- เปิดหน้าเมนูหลักทันที
+else
+    KeyFrame.Visible = true -- ผู้เล่นทั่วไปให้แสดงหน้ากรอก Key
+end
