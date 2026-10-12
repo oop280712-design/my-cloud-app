@@ -1,14 +1,24 @@
--- [[ Steal Eggs: Light-Speed Boss & Red Egg Sniper + Get Key System (VIP: Zorfije) ]] --
+-- [[ Steal Eggs: Ultra Safe UI & Light-Speed Sniper (VIP: Zorfije) ]] --
 
+-- ตรวจสอบและรอให้เกมโหลด PlayerGui ให้เสร็จ 100%
 local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local LocalPlayer = Players.LocalPlayer
+local LocalPlayer = Players.LocalPlayer or Players:GetPropertyChangedSignal("LocalPlayer"):Wait()
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui", 15)
+
+if not PlayerGui then
+    warn("PlayerGui Not Found!")
+    return
+end
+
+-- ลบ UI เก่าออกก่อนป้องกันการรันซ้ำ
+if PlayerGui:FindFirstChild("StealEggKeyHub") then
+    PlayerGui:FindFirstChild("StealEggKeyHub"):Destroy()
+end
 
 -- [[ ตั้งค่าระบบ Key & VIP ]] --
 local CORRECT_KEY = "SPARK-EGGS-2026"
 local KEY_LINK = "https://oop280712-design.github.io/Key-script/"
 
--- รายชื่อผู้เล่นระดับ VIP (ข้ามการกรอก Key อัตโนมัติ)
 local VIP_USERS = {
     ["Zorfije"] = true
 }
@@ -21,12 +31,11 @@ local Settings = {
     IsStealing = false
 }
 
--- เซ็ตจุดฐานอ้างอิง
 if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
     Settings.MyBaseCFrame = LocalPlayer.Character.HumanoidRootPart.CFrame
 end
 
--- ฟังก์ชันเคลื่อนที่ความเร็วแสง (Instant CFrame Teleport)
+-- ฟังก์ชันเคลื่อนที่ความเร็วแสง
 local function lightSpeedMove(targetCFrame)
     local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
     if hrp and targetCFrame then
@@ -34,7 +43,7 @@ local function lightSpeedMove(targetCFrame)
     end
 end
 
--- ค้นหาไข่ตามระดับและตามบอสที่เลือก
+-- ค้นหาไข่
 local function scanEggs()
     local matchedEggs = {}
     for _, obj in pairs(workspace:GetDescendants()) do
@@ -46,7 +55,6 @@ local function scanEggs()
                 local isTierOK = false
                 local isBossOK = false
                 
-                -- 1. กรองระดับไข่
                 if Settings.SelectedTier == "All" then
                     isTierOK = true
                 elseif Settings.SelectedTier == "Red/Gold" then
@@ -59,7 +67,6 @@ local function scanEggs()
                     end
                 end
                 
-                -- 2. กรองตามบอส
                 if Settings.TargetBoss == "All Bosses" then
                     isBossOK = true
                 else
@@ -77,7 +84,7 @@ local function scanEggs()
     return matchedEggs
 end
 
--- ฟังก์ชันขโมยด้วยความเร็วแสงแล้วพา กลับฐานด่วน
+-- ฟังก์ชันขโมยไข่
 local function executeInstantSteal()
     if Settings.IsStealing then return end
     local eggs = scanEggs()
@@ -87,18 +94,15 @@ local function executeInstantSteal()
         local target = eggs[1]
         local targetCFrame = target:IsA("Model") and target:GetPivot() or target.CFrame
         
-        -- 1. วาร์ปความเร็วแสงไปหาไข่
         lightSpeedMove(targetCFrame + Vector3.new(0, 2, 0))
         task.wait(0.05)
         
-        -- 2. ดึงไข่เข้าตัว
         pcall(function()
             if target:IsA("BasePart") then
                 target.CFrame = LocalPlayer.Character.HumanoidRootPart.CFrame
             end
         end)
         
-        -- 3. วาร์ปกลับฐานด่วนทันที
         if Settings.MyBaseCFrame then
             lightSpeedMove(Settings.MyBaseCFrame + Vector3.new(0, 3, 0))
         end
@@ -107,7 +111,7 @@ local function executeInstantSteal()
     end
 end
 
--- สวิตช์ตรวจจับไข่แดงเกิด / กลางคืนรีเซ็ต
+-- ตรวจจับรีเซ็ต / กลางคืน
 workspace.ChildAdded:Connect(function(child)
     if Settings.AutoRedNight then
         local name = child.Name:lower()
@@ -119,14 +123,15 @@ workspace.ChildAdded:Connect(function(child)
 end)
 
 -- ================================================================= --
--- [[ หน้าต่าง Main Hub (เมนูหลัก) ]] --
+-- [[ สร้าง ScreenGui สำหรับเมนูหน้าจอ ]] --
 -- ================================================================= --
 
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "StealEggKeyHub"
 ScreenGui.ResetOnSpawn = false
-ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
+ScreenGui.Parent = PlayerGui
 
+-- 1. หน้าหลัก (Main Frame)
 local MainFrame = Instance.new("Frame")
 MainFrame.Size = UDim2.new(0, 250, 0, 280)
 MainFrame.Position = UDim2.new(0.05, 0, 0.25, 0)
@@ -147,7 +152,6 @@ MainTitle.Font = Enum.Font.SourceSansBold
 MainTitle.BackgroundTransparency = 1
 MainTitle.Parent = MainFrame
 
--- [เมนูที่ 1: เลือกระดับไข่]
 local TierBtn = Instance.new("TextButton")
 TierBtn.Size = UDim2.new(0.88, 0, 0, 32)
 TierBtn.Position = UDim2.new(0.06, 0, 0, 40)
@@ -172,7 +176,6 @@ TierBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- [เมนูที่ 2: เลือกบอสเป้าหมาย]
 local BossBtn = Instance.new("TextButton")
 BossBtn.Size = UDim2.new(0.88, 0, 0, 32)
 BossBtn.Position = UDim2.new(0.06, 0, 0, 80)
@@ -194,7 +197,6 @@ BossBtn.MouseButton1Click:Connect(function()
     BossBtn.Text = "2. บอสเป้าหมาย: [" .. Settings.TargetBoss .. "]"
 end)
 
--- [สวิตช์: เร่งไข่แดงตอนกลางคืน/รีเซ็ต]
 local RedNightBtn = Instance.new("TextButton")
 RedNightBtn.Size = UDim2.new(0.88, 0, 0, 35)
 RedNightBtn.Position = UDim2.new(0.06, 0, 0, 125)
@@ -212,7 +214,6 @@ RedNightBtn.MouseButton1Click:Connect(function()
     RedNightBtn.Text = "🚨 เร่งไข่แดง (กลางคืน/รีเซ็ต): " .. (Settings.AutoRedNight and "ON" or "OFF")
 end)
 
--- [ปุ่มบันทึกตำแหน่งฐาน]
 local SetBaseBtn = Instance.new("TextButton")
 SetBaseBtn.Size = UDim2.new(0.88, 0, 0, 30)
 SetBaseBtn.Position = UDim2.new(0.06, 0, 0, 170)
@@ -233,7 +234,6 @@ SetBaseBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- [ปุ่มกดขโมยความเร็วแสง]
 local StealBtn = Instance.new("TextButton")
 StealBtn.Size = UDim2.new(0.88, 0, 0, 40)
 StealBtn.Position = UDim2.new(0.06, 0, 0, 215)
@@ -249,10 +249,7 @@ StealBtn.MouseButton1Click:Connect(function()
     executeInstantSteal()
 end)
 
--- ================================================================= --
--- [[ หน้าต่าง Key System & VIP Check ]] --
--- ================================================================= --
-
+-- 2. หน้าต่าง Key Frame
 local KeyFrame = Instance.new("Frame")
 KeyFrame.Size = UDim2.new(0, 250, 0, 210)
 KeyFrame.Position = UDim2.new(0.05, 0, 0.3, 0)
@@ -273,7 +270,6 @@ KeyTitle.Font = Enum.Font.SourceSansBold
 KeyTitle.BackgroundTransparency = 1
 KeyTitle.Parent = KeyFrame
 
--- ช่องกรอก Key
 local KeyBox = Instance.new("TextBox")
 KeyBox.Size = UDim2.new(0.88, 0, 0, 36)
 KeyBox.Position = UDim2.new(0.06, 0, 0, 42)
@@ -286,7 +282,6 @@ KeyBox.TextSize = 13
 KeyBox.Parent = KeyFrame
 Instance.new("UICorner", KeyBox).CornerRadius = UDim.new(0, 6)
 
--- ปุ่มคัดลอกลิงก์รับคีย์ (Get Key)
 local GetKeyBtn = Instance.new("TextButton")
 GetKeyBtn.Size = UDim2.new(0.88, 0, 0, 34)
 GetKeyBtn.Position = UDim2.new(0.06, 0, 0, 88)
@@ -299,15 +294,12 @@ GetKeyBtn.Parent = KeyFrame
 Instance.new("UICorner", GetKeyBtn).CornerRadius = UDim.new(0, 6)
 
 GetKeyBtn.MouseButton1Click:Connect(function()
-    pcall(function()
-        setclipboard(KEY_LINK)
-    end)
-    GetKeyBtn.Text = "✅ คัดลอกลิงก์รับคีย์แล้ว!"
+    pcall(function() setclipboard(KEY_LINK) end)
+    GetKeyBtn.Text = "✅ คัดลอกลิงก์เรียบร้อย!"
     task.wait(1.5)
     GetKeyBtn.Text = "📋 คัดลอกลิงก์รับคีย์ (Get Key)"
 end)
 
--- ปุ่มยืนยัน Key
 local CheckKeyBtn = Instance.new("TextButton")
 CheckKeyBtn.Size = UDim2.new(0.88, 0, 0, 38)
 CheckKeyBtn.Position = UDim2.new(0.06, 0, 0, 132)
@@ -321,9 +313,6 @@ Instance.new("UICorner", CheckKeyBtn).CornerRadius = UDim.new(0, 6)
 
 CheckKeyBtn.MouseButton1Click:Connect(function()
     if KeyBox.Text == CORRECT_KEY then
-        CheckKeyBtn.Text = "✅ Key ถูกต้อง! กำลังเปิดเมนู..."
-        CheckKeyBtn.BackgroundColor3 = Color3.fromRGB(46, 204, 113)
-        task.wait(1)
         KeyFrame.Visible = false
         MainFrame.Visible = true
     else
@@ -335,16 +324,12 @@ CheckKeyBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- ================================================================= --
--- [[ ตรวจสอบสิทธิ์ VIP เมื่อเริ่มต้นรันสคริปต์ ]] --
--- ================================================================= --
-
+-- [[ เช็ก VIP เพื่อแสดงผล ]] --
 local username = LocalPlayer.Name
 local displayName = LocalPlayer.DisplayName
 
 if VIP_USERS[username] or VIP_USERS[displayName] then
-    print("👑 ตรวจพบ VIP User: " .. username .. " - ข้ามการกรอก Key อัตโนมัติ!")
-    MainFrame.Visible = true -- เปิดหน้าเมนูหลักทันที
+    MainFrame.Visible = true
 else
-    KeyFrame.Visible = true -- ผู้เล่นทั่วไปให้แสดงหน้ากรอก Key
+    KeyFrame.Visible = true
 end
