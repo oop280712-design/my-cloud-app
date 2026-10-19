@@ -7,7 +7,7 @@ local PlayerGui = LocalPlayer:WaitForChild("PlayerGui", 15)
 -- ตรวจสอบสิทธิ์ VIP (เฉพาะ Zoryfje)
 local ALLOWED_VIP = "Zoryfje"
 if LocalPlayer.Name ~= ALLOWED_VIP and LocalPlayer.DisplayName ~= ALLOWED_VIP then
-    LocalPlayer:Kick("❌ สคริปต์นี้อนุญาตให้ใช้งานเฉพาะ VIP: Zorfije เท่านั้น!")
+    LocalPlayer:Kick("❌ สคริปต์นี้อนุญาตให้ใช้งานเฉพาะ VIP: Zoryfje เท่านั้น!")
     return
 end
 
