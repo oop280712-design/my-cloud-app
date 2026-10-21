@@ -7,8 +7,8 @@ local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer or Players:GetPropertyChangedSignal("LocalPlayer"):Wait()
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui", 15)
 
--- ตรวจสอบสิทธิ์ VIP (เฉพาะ Rygdeeeeee เท่านั้น)
-local ALLOWED_VIP = "Rygdeeeeee"
+-- ตรวจสอบสิทธิ์ VIP (เฉพาะ rygdeeeeee เท่านั้น)
+local ALLOWED_VIP = "rygdeeeeee"
 if LocalPlayer.Name ~= ALLOWED_VIP and LocalPlayer.DisplayName ~= ALLOWED_VIP then
     LocalPlayer:Kick("❌ สคริปต์ MM2 นี้อนุญาตให้ใช้งานเฉพาะ VIP: Rygdeeeeee เท่านั้น!")
     return
