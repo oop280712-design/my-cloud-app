@@ -3,134 +3,182 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dueling Grounds & 99 Forest Script Hub</title>
+    <title>Script Hub - Main Menu</title>
     <style>
-        body {
-            background-color: #121212;
-            color: #ffffff;
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
+        * {
             box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background-color: #0b0c10;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
         }
         .container {
+            background-color: #1f2833;
             width: 100%;
-            max-width: 420px;
-        }
-        .card {
-            background: #1e1e1e;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            max-width: 480px;
+            padding: 25px 20px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
             text-align: center;
-            border: 1px solid #333;
-            margin-bottom: 20px;
+            border: 1px solid #45a29e;
         }
         h2 {
-            color: #f1c40f;
+            color: #66fcf1;
             margin-top: 0;
-            margin-bottom: 10px;
-            font-size: 18px;
+            margin-bottom: 5px;
+            font-size: 22px;
         }
-        .forest-title { color: #2ecc71; }
-        .gem-title { color: #00d2d3; }
-        .egg-title { color: #e67e22; }
-        p {
-            color: #bbb;
-            font-size: 13px;
+        .subtitle {
+            color: #c5c6c7;
+            font-size: 12px;
+            margin-bottom: 20px;
+        }
+        .script-card {
+            background-color: #0b0c10;
+            border: 1px solid #45a29e;
+            border-radius: 10px;
+            padding: 15px;
             margin-bottom: 15px;
-            line-height: 1.4;
+            text-align: left;
+            position: relative;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
         }
-        .btn {
-            background-color: #f39c12;
-            color: white;
-            border: none;
-            padding: 12px 20px;
+        .script-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: #66fcf1;
+            color: #0b0c10;
+            font-size: 9px;
+            font-weight: bold;
+            padding: 3px 7px;
+            border-radius: 10px;
+        }
+        .script-title {
             font-size: 15px;
             font-weight: bold;
-            border-radius: 8px;
-            cursor: pointer;
-            width: 100%;
-            transition: background 0.3s;
+            color: #f1c40f;
+            margin-bottom: 6px;
         }
-        .btn-forest { background-color: #27ae60; }
-        .btn-gem { background-color: #01a3a4; }
-        .btn-egg { background-color: #d35400; }
-        .btn:active { opacity: 0.8; }
-        .footer {
-            text-align: center;
-            margin-top: 10px;
+        .script-desc {
+            font-size: 11px;
+            color: #a8a9ad;
+            margin-bottom: 10px;
+        }
+        .code-box {
+            background-color: #12141d;
+            border: 1px solid #2d3348;
+            border-radius: 6px;
+            padding: 8px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 10px;
+            color: #2ecc71;
+            word-break: break-all;
+            margin-bottom: 10px;
+            max-height: 45px;
+            overflow-y: auto;
+        }
+        .btn-copy {
+            background-color: #45a29e;
+            color: #0b0c10;
+            border: none;
+            width: 100%;
+            padding: 9px;
+            border-radius: 6px;
             font-size: 12px;
-            color: #666;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-copy:hover {
+            background-color: #66fcf1;
+        }
+        .footer {
+            margin-top: 15px;
+            font-size: 10px;
+            color: #888;
         }
     </style>
 </head>
 <body>
 
-<div class="container">
+    <div class="container">
+        <h2>📂 SCRIPT HUB</h2>
+        <div class="subtitle">เลือกคัดลอกสคริปต์จากไฟล์ของคุณไปใช้งานได้ทันที</div>
 
-    <!-- Card 1: Dueling Grounds Ultimate -->
-    <div class="card">
-        <h2>⚔️ Dueling Grounds Ultimate</h2>
-        <p>สคริปต์ God Auto Parry & Speed Boost สำหรับ Dueling Grounds</p>
-        <button class="btn" onclick="copyDuelingScript()">📋 คัดลอกสคริปต์ Dueling Grounds</button>
+        <!-- 1. 99_gems.lua -->
+        <div class="script-card">
+            <span class="script-badge">GEMS</span>
+            <div class="script-title">💎 99 Gems (ฟาร์มเพชร)</div>
+            <div class="script-desc">ไฟล์: 99_gems.lua[span_0](start_span)[span_0](end_span)</div>
+            <div class="code-box" id="scr1">loadstring(game:HttpGet("https://raw.githubusercontent.com/oop280712-design/my-cloud-app/main/99_gems.lua?v=" .. tostring(math.random(1,1000))))()</div>
+            <button class="btn-copy" onclick="copyScript('scr1', '99 Gems')">📋 คัดลอกสคริปต์ 99 Gems</button>
+        </div>
+
+        <!-- 2. 99 nightintheforest.... -->
+        <div class="script-card">
+            <span class="script-badge">SURVIVAL</span>
+            <div class="script-title">🌙 99 Nights in the Forest</div>
+            <div class="script-desc">ไฟล์: 99 nightintheforest....[span_1](start_span)[span_1](end_span)</div>
+            <div class="code-box" id="scr2">loadstring(game:HttpGet("https://raw.githubusercontent.com/oop280712-design/my-cloud-app/main/99%20nightintheforest....?v=" .. tostring(math.random(1,1000))))()</div>
+            <button class="btn-copy" onclick="copyScript('scr2', '99 Nights')">📋 คัดลอกสคริปต์ 99 Nights</button>
+        </div>
+
+        <!-- 3. DuelingGrounds_Ul... -->
+        <div class="script-card">
+            <span class="script-badge">GROUND</span>
+            <div class="script-title">🩸 Dueling Grounds / During the Ground</div>
+            <div class="script-desc">ไฟล์: DuelingGrounds_Ul...[span_2](start_span)[span_2](end_span)</div>
+            <div class="code-box" id="scr3">loadstring(game:HttpGet("https://raw.githubusercontent.com/oop280712-design/my-cloud-app/main/DuelingGrounds_Ul...?v=" .. tostring(math.random(1,1000))))()</div>
+            <button class="btn-copy" onclick="copyScript('scr3', 'Dueling Grounds')">📋 คัดลอกสคริปต์ Dueling Grounds</button>
+        </div>
+
+        <!-- 4. vip_steal_eggs.lua -->
+        <div class="script-card">
+            <span class="script-badge">STEAL EGGS</span>
+            <div class="script-title">🥚 Steal Eggs Hub</div>
+            <div class="script-desc">ไฟล์: vip_steal_eggs.lua[span_3](start_span)[span_3](end_span)</div>
+            <div class="code-box" id="scr4">loadstring(game:HttpGet("https://raw.githubusercontent.com/oop280712-design/my-cloud-app/main/vip_steal_eggs.lua?v=" .. tostring(math.random(1,1000))))()</div>
+            <button class="btn-copy" onclick="copyScript('scr4', 'Steal Eggs')">📋 คัดลอกสคริปต์ Steal Eggs</button>
+        </div>
+
+        <!-- 5. vip_MM2.lua -->
+        <div class="script-card">
+            <span class="script-badge">MM2</span>
+            <div class="script-title">🔪 Murder Mystery 2 Hub</div>
+            <div class="script-desc">ไฟล์: vip_MM2.lua[span_4](start_span)[span_4](end_span)</div>
+            <div class="code-box" id="scr5">loadstring(game:HttpGet("https://raw.githubusercontent.com/oop280712-design/my-cloud-app/main/vip_MM2.lua?v=" .. tostring(math.random(1,1000))))()</div>
+            <button class="btn-copy" onclick="copyScript('scr5', 'MM2')">📋 คัดลอกสคริปต์ MM2</button>
+        </div>
+
+        <div class="footer">
+            Powered by oop280712-design © 2026[span_5](start_span)[span_5](end_span)
+        </div>
     </div>
 
-    <!-- Card 2: 99 Nights in the Forest -->
-    <div class="card">
-        <h2 class="forest-title">🌲 99 Nights in the Forest</h2>
-        <p>สคริปต์ 99 ใน the forest (God Heal, ไม่หนาวตาย, ออโต้ตัดไม้, ดึงของ)</p>
-        <button class="btn btn-forest" onclick="copyForestScript()">📋 คัดลอกสคริปต์ 99 Forest</button>
-    </div>
-
-    <!-- Card 3: 99 Forest Auto Gem Hop -->
-    <div class="card">
-        <h2 class="gem-title">💎 99 Forest: Instant Gem Pull</h2>
-        <p>ดึงเพชรเข้าตัวทันทีในแมพ พร้อมสวิตช์วาร์ปย้ายเกมให้อัตโนมัติ</p>
-        <button class="btn btn-gem" onclick="copyGemScript()">📋 คัดลอกสคริปต์ ดึงเพชร</button>
-    </div>
-
-    <!-- Card 4: Steal Eggs Hub -->
-    <div class="card">
-        <h2 class="egg-title">🥚 Steal Eggs Hub</h2>
-        <p>สคริปต์แมพขโมยไข่ (Auto Steal Eggs, วิ่งเร็ว, กระโดดสูง)</p>
-        <button class="btn btn-egg" onclick="copyEggScript()">📋 คัดลอกสคริปต์ ขโมยไข่</button>
-    </div>
-
-    <div class="footer">Powered by oop280712-design</div>
-
-</div>
-
-<script>
-function copyDuelingScript() {
-    var scriptText = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/oop280712-design/my-cloud-app/main/DuelingGrounds_Ultimate.lua"))()';
-    navigator.clipboard.writeText(scriptText).then(function() { alert("คัดลอกสคริปต์ Dueling Grounds เรียบร้อยแล้ว!"); });
-}
-
-function copyForestScript() {
-    var scriptText = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/oop280712-design/my-cloud-app/main/99.lua"))()';
-    navigator.clipboard.writeText(scriptText).then(function() { alert("คัดลอกสคริปต์ 99 Forest เรียบร้อยแล้ว!"); });
-}
-
-function copyGemScript() {
-    var scriptText = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/oop280712-design/my-cloud-app/main/99_gems.lua"))()';
-    navigator.clipboard.writeText(scriptText).then(function() { alert("คัดลอกสคริปต์ Auto Gem Hop เรียบร้อยแล้ว!"); });
-}
-
-function copyEggScript() {
-    var scriptText = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/oop280712-design/my-cloud-app/main/steal_eggs.lua"))()';
-    navigator.clipboard.writeText(scriptText).then(function() { alert("คัดลอกสคริปต์ขโมยไข่เรียบร้อยแล้ว!"); });
-}
-
-function copyvipEggScript() {
-    var scriptText = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/oop280712-design/my-cloud-app/main/vip_steal_eggs.lua"))()';
-    navigator.clipboard.writeText(scriptText).then(function() { alert("คัดลอกสคริปต์ขโมยไข่เรียบร้อยแล้ว!"); });
-}
-</script>
-
+    <script>
+        function copyScript(elementId, name) {
+            let codeText = document.getElementById(elementId).innerText;
+            navigator.clipboard.writeText(codeText).then(() => {
+                alert('🎉 คัดลอกสคริปต์ ' + name + ' สำเร็จ!');
+            }).catch(() => {
+                let temp = document.createElement("textarea");
+                temp.value = codeText;
+                document.body.appendChild(temp);
+                temp.select();
+                document.execCommand("copy");
+                document.body.removeChild(temp);
+                alert('🎉 คัดลอกสคริปต์ ' + name + ' สำเร็จ!');
+            });
+        }
+    </script>
 </body>
 </html>
