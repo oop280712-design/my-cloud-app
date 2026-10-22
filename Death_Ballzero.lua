@@ -7,6 +7,7 @@ local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 local VirtualInputManager = game:GetService("VirtualInputManager")
 local UserInputService = game:GetService("UserInputService")
+local StarterGui = game:GetService("StarterGui")
 
 local LocalPlayer = Players.LocalPlayer
 if not LocalPlayer then
@@ -14,7 +15,11 @@ if not LocalPlayer then
     LocalPlayer = Players.LocalPlayer
 end
 
-local PlayerGui = LocalPlayer:WaitForChild("PlayerGui", 20)
+local function getGuiFolder()
+    return LocalPlayer:WaitForChild("PlayerGui", 15)
+end
+
+local PlayerGui = getGuiFolder()
 
 -- ลบ UI เก่าป้องกันการรันซ้ำ
 if PlayerGui:FindFirstChild("DeathBallAdvancedUI") then
@@ -28,6 +33,15 @@ local Settings = {
     ClutchSpeed = 0.01,
     InfJump = false
 }
+
+-- แจ้งเตือนเมื่อสคริปต์เริ่มรัน
+pcall(function()
+    StarterGui:SetCore("SendNotification", {
+        Title = "⚽ Death Ball Hub",
+        Text = "กำลังโหลดเมนูควบคุม...",
+        Duration = 3
+    })
+end)
 
 -- ================================================================= --
 -- [[ 1. วาดวงกลมโซน 3D ล้อมรอบตัวผู้เล่น (Parry Zone Circle) ]] --
@@ -101,7 +115,7 @@ RunService.RenderStepped:Connect(function()
                 local distance = (ball.Position - hrp.Position).Magnitude
                 local currentLives = getPlayerLives()
 
-                -- 🛑 ระบบล่องหนทำงานอัตโนมัติ: ถ้าชีวิตเหลือ 1 จะตีสวนทันทีใน 0.01s
+                -- ระบบล่องหนทำงานอัตโนมัติ: ถ้าชีวิตเหลือ 1 จะตีสวนทันทีใน 0.01s
                 if currentLives <= 1 then
                     ZonePart.Color = Color3.fromRGB(231, 76, 60)
                     if distance <= (Settings.ParryRange + 15) then
@@ -151,7 +165,7 @@ ScreenGui.Parent = PlayerGui
 
 local MainFrame = Instance.new("Frame")
 MainFrame.Size = UDim2.new(0, 270, 0, 220)
-MainFrame.Position = UDim2.new(0.05, 0, 0.18, 0)
+MainFrame.Position = UDim2.new(0.05, 0, 0.25, 0)
 MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 22)
 MainFrame.Active = true
 MainFrame.Draggable = true
@@ -214,7 +228,7 @@ end)
 -- 3. ปุ่มปลดล็อกสกินดาบทั้งหมด
 createButton(120, Color3.fromRGB(155, 89, 182), "🎃 ปลดล็อกสกินดาบทั้งหมด + Halloween", function(btn)
     unlockAllSwords()
-    btn.Text = "✅ ปลดล็อกสกินดาบทั้งหมดเรียบร้อย!"
+    btn.Text = "✅ ปลดล็อกสกินดาบเรียบร้อย!"
 end)
 
 -- 4. ปุ่ม Infinity Jump
@@ -229,6 +243,15 @@ UserInputService.JumpRequest:Connect(function()
     if Settings.InfJump and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
         LocalPlayer.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
     end
+end)
+
+-- แจ้งเตือนเมื่อโหลด UI เสร็จสมบูรณ์
+pcall(function()
+    StarterGui:SetCore("SendNotification", {
+        Title = "🎉 สำเร็จ!",
+        Text = "โหลดหน้าต่างควบคุมเรียบร้อยแล้ว",
+        Duration = 3
+    })
 end)
 
 print("🚀 Death Ball Hub Loaded Successfully!")
