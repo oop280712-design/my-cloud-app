@@ -6,8 +6,15 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 local VirtualInputManager = game:GetService("VirtualInputManager")
-local LocalPlayer = Players.LocalPlayer or Players:GetPropertyChangedSignal("LocalPlayer"):Wait()
-local PlayerGui = LocalPlayer:WaitForChild("PlayerGui", 15)
+local UserInputService = game:GetService("UserInputService")
+
+local LocalPlayer = Players.LocalPlayer
+if not LocalPlayer then
+    Players:GetPropertyChangedSignal("LocalPlayer"):Wait()
+    LocalPlayer = Players.LocalPlayer
+end
+
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui", 20)
 
 -- ลบ UI เก่าป้องกันการรันซ้ำ
 if PlayerGui:FindFirstChild("DeathBallAdvancedUI") then
@@ -16,9 +23,10 @@ end
 
 local Settings = {
     AutoParry = false,
-    ParryRange = 100, -- ระยะโซนเริ่มต้น (ปรับได้ 50 - 200)
+    ParryRange = 100,
     ShowZoneCircle = true,
-    ClutchSpeed = 0.01
+    ClutchSpeed = 0.01,
+    InfJump = false
 }
 
 -- ================================================================= --
@@ -36,7 +44,8 @@ ZonePart.CanCollide = false
 ZonePart.CastShadow = false
 
 local function updateZoneVisual()
-    local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    local char = LocalPlayer.Character
+    local hrp = char and char:FindFirstChild("HumanoidRootPart")
     if hrp and Settings.ShowZoneCircle and Settings.AutoParry then
         ZonePart.Parent = Workspace
         ZonePart.Size = Vector3.new(0.2, Settings.ParryRange * 2, Settings.ParryRange * 2)
@@ -60,12 +69,13 @@ local function getBall()
 end
 
 local function triggerParry()
-    VirtualInputManager:SendKeyPressEvent(Enum.KeyCode.F, false)
-    task.wait(0.005)
-    VirtualInputManager:SendKeyReleaseEvent(Enum.KeyCode.F, false)
+    pcall(function()
+        VirtualInputManager:SendKeyPressEvent(Enum.KeyCode.F, false)
+        task.wait(0.005)
+        VirtualInputManager:SendKeyReleaseEvent(Enum.KeyCode.F, false)
+    end)
 end
 
--- ระบบเช็กชีวิตผู้เล่นอัตโนมัติ (ทำงานแบบล่องหน)
 local function getPlayerLives()
     local lives = 3
     local char = LocalPlayer.Character
@@ -79,33 +89,36 @@ local function getPlayerLives()
 end
 
 RunService.RenderStepped:Connect(function()
-    updateZoneVisual()
+    pcall(function()
+        updateZoneVisual()
 
-    if Settings.AutoParry then
-        local ball = getBall()
-        local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if Settings.AutoParry then
+            local ball = getBall()
+            local char = LocalPlayer.Character
+            local hrp = char and char:FindFirstChild("HumanoidRootPart")
 
-        if ball and hrp then
-            local distance = (ball.Position - hrp.Position).Magnitude
-            local currentLives = getPlayerLives()
+            if ball and hrp then
+                local distance = (ball.Position - hrp.Position).Magnitude
+                local currentLives = getPlayerLives()
 
-            -- 🛑 ระบบล่องหนทำงานอัตโนมัติ: ถ้าชีวิตเหลือ 1 จะตีสวนทันทีใน 0.01s
-            if currentLives <= 1 then
-                ZonePart.Color = Color3.fromRGB(231, 76, 60)
-                if distance <= (Settings.ParryRange + 15) then
-                    task.spawn(function()
-                        task.wait(Settings.ClutchSpeed) -- ตีเร็ว 0.01s
+                -- 🛑 ระบบล่องหนทำงานอัตโนมัติ: ถ้าชีวิตเหลือ 1 จะตีสวนทันทีใน 0.01s
+                if currentLives <= 1 then
+                    ZonePart.Color = Color3.fromRGB(231, 76, 60)
+                    if distance <= (Settings.ParryRange + 15) then
+                        task.spawn(function()
+                            task.wait(Settings.ClutchSpeed)
+                            triggerParry()
+                        end)
+                    end
+                else
+                    ZonePart.Color = Color3.fromRGB(52, 152, 219)
+                    if distance <= Settings.ParryRange then
                         triggerParry()
-                    end)
-                end
-            else
-                ZonePart.Color = Color3.fromRGB(52, 152, 219)
-                if distance <= Settings.ParryRange then
-                    triggerParry()
+                    end
                 end
             end
         end
-    end
+    end)
 end)
 
 -- ================================================================= --
@@ -198,13 +211,13 @@ createButton(80, Color3.fromRGB(52, 152, 219), "🎯 ปรับขนาดโ
     end
 end)
 
--- 3. ปุ่มปลดล็อกสกินดาบทั้งหมดอยู่ในเมนูหลัก
+-- 3. ปุ่มปลดล็อกสกินดาบทั้งหมด
 createButton(120, Color3.fromRGB(155, 89, 182), "🎃 ปลดล็อกสกินดาบทั้งหมด + Halloween", function(btn)
     unlockAllSwords()
     btn.Text = "✅ ปลดล็อกสกินดาบทั้งหมดเรียบร้อย!"
 end)
 
--- ปุ่ม Infinity Jump
+-- 4. ปุ่ม Infinity Jump
 createButton(160, Color3.fromRGB(230, 126, 34), "🦘 Infinity Jump (กระโดดรัว): OFF", function(btn)
     Settings.InfJump = not Settings.InfJump
     btn.BackgroundColor3 = Settings.InfJump and Color3.fromRGB(46, 204, 113) or Color3.fromRGB(230, 126, 34)
@@ -212,7 +225,7 @@ createButton(160, Color3.fromRGB(230, 126, 34), "🦘 Infinity Jump (กระ�
 end)
 
 -- ระบบ Infinity Jump
-game:GetService("UserInputService").JumpRequest:Connect(function()
+UserInputService.JumpRequest:Connect(function()
     if Settings.InfJump and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
         LocalPlayer.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
     end
