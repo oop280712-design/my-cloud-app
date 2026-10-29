@@ -1,31 +1,39 @@
 -- ================================================================= --
--- [[ PLS DONATE: PARADOX STEALER HUB ]] --
+-- [[ PLS DONATE: PARADOX STEALER HUB (FIXED VERSION) ]] --
 -- ================================================================= --
 
 local Players = game:GetService("Players")
+local CoreGui = game:GetService("CoreGui")
 local StarterGui = game:GetService("StarterGui")
-local LocalPlayer = Players.LocalPlayer or Players:GetPropertyChangedSignal("LocalPlayer"):Wait()
-local PlayerGui = LocalPlayer:WaitForChild("PlayerGui", 20)
+
+local LocalPlayer = Players.LocalPlayer
+if not LocalPlayer then
+    Players:GetPropertyChangedSignal("LocalPlayer"):Wait()
+    LocalPlayer = Players.LocalPlayer
+end
+
+-- เลือกใช้ CoreGui ถ้าตัวรันรองรับ เพื่อป้องกัน UI หายตอนรีสัปย์
+local targetParent = (pcall(function() return CoreGui:IsA("Instance") end) and CoreGui) or LocalPlayer:WaitForChild("PlayerGui", 10)
 
 -- ลบ UI เก่าป้องกันการรันซ้ำ
-if PlayerGui:FindFirstChild("ParadoxStealerUI") then
-    PlayerGui:FindFirstChild("ParadoxStealerUI"):Destroy()
+if targetParent:FindFirstChild("ParadoxStealerUI") then
+    targetParent:FindFirstChild("ParadoxStealerUI"):Destroy()
 end
 
 -- แจ้งเตือนเมื่อสคริปต์ทำงาน
 pcall(function()
     StarterGui:SetCore("SendNotification", {
         Title = "Paradox Stealer",
-        Text = "โหลดสคริปต์สำเร็จ!",
+        Text = "โหลดสคริปต์สำเร็จแล้ว!",
         Duration = 3
     })
 end)
 
--- สร้างหน้าต่าง GUI (สไตล์ตามคลิป)
+-- สร้างหน้าต่าง GUI
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "ParadoxStealerUI"
 ScreenGui.ResetOnSpawn = false
-ScreenGui.Parent = PlayerGui
+ScreenGui.Parent = targetParent
 
 local MainFrame = Instance.new("Frame")
 MainFrame.Size = UDim2.new(0, 300, 0, 200)
@@ -101,7 +109,7 @@ StealBtn.MouseButton1Click:Connect(function()
     StealBtn.Text = "กำลังดำเนินการ..."
     task.wait(1)
 
-    -- จำลองระบบแจ้งเตือนบริจาคแบบในคลิป
+    -- จำลองระบบแจ้งเตือนบริจาคแบบในคลิป[span_0](start_span)[span_0](end_span)
     pcall(function()
         StarterGui:SetCore("SendNotification", {
             Title = "PLS Donate",
