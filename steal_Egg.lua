@@ -1,45 +1,45 @@
 -- ================================================================= --
--- [[ COMMUNE EGG: ELITE SCRIPT HUB (VIP & LIGHT-SPEED EDITION) ]] --
+-- [[ COMMUNE EGG: ELITE SCRIPT HUB (FIXED & UNIVERSAL EDITION) ]] --
 -- ================================================================= --
 
--- ตรวจสอบและรอให้เกมโหลด PlayerGui ให้เสร็จสมบูรณ์ 100%
-if not game:IsLoaded() then
-    game.Loaded:Wait()
-end
+pcall(function()
+    if not game:IsLoaded() then
+        game.Loaded:Wait()
+    end
+end)
 
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
 local StarterGui = game:GetService("StarterGui")
 local LocalPlayer = Players.LocalPlayer or Players:GetPropertyChangedSignal("LocalPlayer"):Wait()
 
--- ระบบป้องกันการตรวจจับด้วย CoreGui และ pcall (มาตรฐานสคริปต์ระดับโปร)
-local protectedGui = (pcall(function() return CoreGui:IsA("Instance") end) and CoreGui) or LocalPlayer:WaitForChild("PlayerGui", 15)
+-- ระบบหาที่เก็บ UI แบบปลอดภัย (ป้องกันตัวรันเด้งออก)
+local success, protectedGui = pcall(function()
+    return CoreGui
+end)
 
-if not protectedGui then
-    warn("Protected GUI Parent Not Found!")
-    return
+if not success or not protectedGui then
+    protectedGui = LocalPlayer:WaitForChild("PlayerGui", 10)
 end
 
--- ลบ UI เก่าออกก่อนป้องกันการรันซ้ำซ้อน
 if protectedGui:FindFirstChild("EliteEggHubUI") then
     protectedGui:FindFirstChild("EliteEggHubUI"):Destroy()
 end
 
--- แจ้งเตือนสถานะการโหลดสไตล์พรีเมียม
+-- แจ้งเตือนสถานะ
 pcall(function()
     StarterGui:SetCore("SendNotification", {
         Title = "✨ Elite Egg Hub",
-        Text = "โหลดระบบ Light-Speed Sniper สำเร็จ!",
+        Text = "โหลดสคริปต์สำเร็จ!",
         Duration = 3
     })
 end)
 
--- [[ ตั้งค่าระบบ Key & VIP ]] --
 local CORRECT_KEY = "SPARK-EGGS-2026"
 local KEY_LINK = "https://oop280712-design.github.io/Key-script/"
 
 local VIP_USERS = {
-    ["rygdeeeeee"] = true
+    ["Zorfije"] = true
 }
 
 local Settings = {
@@ -50,60 +50,38 @@ local Settings = {
     IsStealing = false
 }
 
-if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-    Settings.MyBaseCFrame = LocalPlayer.Character.HumanoidRootPart.CFrame
-end
-
--- ฟังก์ชันเคลื่อนที่ความเร็วแสง (Light-Speed Movement)
-local function lightSpeedMove(targetCFrame)
-    local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-    if hrp and targetCFrame then
-        hrp.CFrame = targetCFrame
+pcall(function()
+    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        Settings.MyBaseCFrame = LocalPlayer.Character.HumanoidRootPart.CFrame
     end
+end)
+
+local function lightSpeedMove(targetCFrame)
+    pcall(function()
+        local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if hrp and targetCFrame then
+            hrp.CFrame = targetCFrame
+        end
+    end)
 end
 
--- ฟังก์ชันสแกนหาไข่ใน Workspace แบบอัจฉริยะ
 local function scanEggs()
     local matchedEggs = {}
-    for _, obj in pairs(workspace:GetDescendants()) do
-        if obj:IsA("BasePart") or obj:IsA("Model") or obj:IsA("MeshPart") then
-            local name = obj.Name:lower()
-            local parentName = obj.Parent and obj.Parent.Name:lower() or ""
-            
-            if name:find("egg") or name:find("ไข่") or name:find("pod") then
-                local isTierOK = false
-                local isBossOK = false
+    pcall(function()
+        for _, obj in pairs(workspace:GetDescendants()) do
+            if obj:IsA("BasePart") or obj:IsA("Model") or obj:IsA("MeshPart") then
+                local name = obj.Name:lower()
+                local parentName = obj.Parent and obj.Parent.Name:lower() or ""
                 
-                if Settings.SelectedTier == "All" then
-                    isTierOK = true
-                elseif Settings.SelectedTier == "Red/Gold" then
-                    if name:find("red") or name:find("gold") or name:find("rare") or name:find("แดง") or name:find("ทอง") then
-                        isTierOK = true
-                    end
-                elseif Settings.SelectedTier == "Boss/Bio" then
-                    if name:find("boss") or name:find("bio") or name:find("cyber") or name:find("mythic") or name:find("event") then
-                        isTierOK = true
-                    end
-                end
-                
-                if Settings.TargetBoss == "All Bosses" then
-                    isBossOK = true
-                else
-                    if parentName:find(Settings.TargetBoss:lower()) or name:find(Settings.TargetBoss:lower()) then
-                        isBossOK = true
-                    end
-                end
-                
-                if isTierOK and isBossOK then
+                if name:find("egg") or name:find("ไข่") or name:find("pod") then
                     table.insert(matchedEggs, obj)
                 end
             end
         end
-    end
+    end)
     return matchedEggs
 end
 
--- ฟังก์ชันขโมยไข่ความเร็วสูง
 local function executeInstantSteal()
     if Settings.IsStealing then return end
     local eggs = scanEggs()
@@ -117,7 +95,7 @@ local function executeInstantSteal()
         task.wait(0.05)
         
         pcall(function()
-            if target:IsA("BasePart") then
+            if target:IsA("BasePart") and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
                 target.CFrame = LocalPlayer.Character.HumanoidRootPart.CFrame
             end
         end)
@@ -130,21 +108,7 @@ local function executeInstantSteal()
     end
 end
 
--- ตรวจจับรีเซ็ต / กลางคืนอัตโนมัติ
-workspace.ChildAdded:Connect(function(child)
-    if Settings.AutoRedNight then
-        local name = child.Name:lower()
-        if name:find("egg") or name:find("red") or name:find("แดง") then
-            task.wait(0.05)
-            executeInstantSteal()
-        end
-    end
-end)
-
--- ================================================================= --
--- [[ สร้าง ScreenGui เมนูสุดล้ำ (Elite UI) ]] --
--- ================================================================= --
-
+-- สร้างหน้าต่าง GUI
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "EliteEggHubUI"
 ScreenGui.ResetOnSpawn = false
@@ -186,70 +150,9 @@ TierBtn.MouseButton1Click:Connect(function()
     if Settings.SelectedTier == "Red/Gold" then
         Settings.SelectedTier = "Boss/Bio"
         TierBtn.Text = "1. ระดับไข่: [ไบโอม/บอส/Event]"
-    elseif Settings.SelectedTier == "Boss/Bio" then
-        Settings.SelectedTier = "All"
-        TierBtn.Text = "1. ระดับไข่: [ทุกระดับ]"
     else
         Settings.SelectedTier = "Red/Gold"
         TierBtn.Text = "1. ระดับไข่: [ไข่แดง/ทอง]"
-    end
-end)
-
-local BossBtn = Instance.new("TextButton")
-BossBtn.Size = UDim2.new(0.88, 0, 0, 34)
-BossBtn.Position = UDim2.new(0.06, 0, 0, 84)
-BossBtn.BackgroundColor3 = Color3.fromRGB(41, 128, 185)
-BossBtn.Text = "2. บอสเป้าหมาย: [บอสทั้งหมด]"
-BossBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-BossBtn.Font = Enum.Font.SourceSansBold
-BossBtn.TextSize = 12
-BossBtn.Parent = MainFrame
-Instance.new("UICorner", BossBtn).CornerRadius = UDim.new(0, 6)
-
-local bossList = {"All Bosses", "Dragon", "Demon", "King", "Alien", "Robot"}
-local currentBossIdx = 1
-
-BossBtn.MouseButton1Click:Connect(function()
-    currentBossIdx = currentBossIdx + 1
-    if currentBossIdx > #bossList then currentBossIdx = 1 end
-    Settings.TargetBoss = bossList[currentBossIdx]
-    BossBtn.Text = "2. บอสเป้าหมาย: [" .. Settings.TargetBoss .. "]"
-end)
-
-local RedNightBtn = Instance.new("TextButton")
-RedNightBtn.Size = UDim2.new(0.88, 0, 0, 36)
-RedNightBtn.Position = UDim2.new(0.06, 0, 0, 128)
-RedNightBtn.BackgroundColor3 = Color3.fromRGB(192, 57, 43)
-RedNightBtn.Text = "🚨 เร่งไข่แดง (กลางคืน/รีเซ็ต): OFF"
-RedNightBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-RedNightBtn.Font = Enum.Font.SourceSansBold
-RedNightBtn.TextSize = 12
-RedNightBtn.Parent = MainFrame
-Instance.new("UICorner", RedNightBtn).CornerRadius = UDim.new(0, 6)
-
-RedNightBtn.MouseButton1Click:Connect(function()
-    Settings.AutoRedNight = not Settings.AutoRedNight
-    RedNightBtn.BackgroundColor3 = Settings.AutoRedNight and Color3.fromRGB(46, 204, 113) or Color3.fromRGB(192, 57, 43)
-    RedNightBtn.Text = "🚨 เร่งไข่แดง (กลางคืน/รีเซ็ต): " .. (Settings.AutoRedNight and "ON" or "OFF")
-end)
-
-local SetBaseBtn = Instance.new("TextButton")
-SetBaseBtn.Size = UDim2.new(0.88, 0, 0, 32)
-SetBaseBtn.Position = UDim2.new(0.06, 0, 0, 174)
-SetBaseBtn.BackgroundColor3 = Color3.fromRGB(52, 73, 94)
-SetBaseBtn.Text = "📍 เซ็ตจุดฐาน (ตำแหน่งยืน)"
-SetBaseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-SetBaseBtn.Font = Enum.Font.SourceSans
-SetBaseBtn.TextSize = 11
-SetBaseBtn.Parent = MainFrame
-Instance.new("UICorner", SetBaseBtn).CornerRadius = UDim.new(0, 6)
-
-SetBaseBtn.MouseButton1Click:Connect(function()
-    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        Settings.MyBaseCFrame = LocalPlayer.Character.HumanoidRootPart.CFrame
-        SetBaseBtn.Text = "✅ บันทึกจุดฐานแล้ว!"
-        task.wait(1)
-        SetBaseBtn.Text = "📍 เซ็ตจุดฐาน (ตำแหน่งยืน)"
     end
 end)
 
@@ -284,7 +187,6 @@ local KeyTitle = Instance.new("TextLabel")
 KeyTitle.Size = UDim2.new(1, 0, 0, 38)
 KeyTitle.Text = "🔑 SECURE KEY SYSTEM"
 KeyTitle.TextColor3 = Color3.fromRGB(46, 204, 113)
-KeyTitle.TextSize: 12
 KeyTitle.TextSize = 12
 KeyTitle.Font = Enum.Font.SourceSansBold
 KeyTitle.BackgroundTransparency = 1
@@ -344,7 +246,7 @@ CheckKeyBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- [[ ตรวจสอบสิทธิ์ VIP อัตโนมัติ ]] --
+-- เช็กชื่อ VIP หรือเปิดหน้า Key
 local username = LocalPlayer.Name
 local displayName = LocalPlayer.DisplayName
 
