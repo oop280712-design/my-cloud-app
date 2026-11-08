@@ -39,7 +39,7 @@ local CORRECT_KEY = "SPARK-EGGS-2026"
 local KEY_LINK = "https://oop280712-design.github.io/Key-script/"
 
 local VIP_USERS = {
-    ["Zorfije"] = true
+    ["rygdeeeeee"] = true
 }
 
 local Settings = {
