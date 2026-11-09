@@ -1,5 +1,5 @@
 -- ================================================================= --
--- [[ COMMUNE EGG: ELITE SCRIPT HUB (FIXED & UNIVERSAL EDITION) ]] --
+-- [[ COMMUNE EGG: ULTRA STABLE FAST SNIPER ]] --
 -- ================================================================= --
 
 pcall(function()
@@ -9,251 +9,121 @@ pcall(function()
 end)
 
 local Players = game:GetService("Players")
-local CoreGui = game:GetService("CoreGui")
 local StarterGui = game:GetService("StarterGui")
 local LocalPlayer = Players.LocalPlayer or Players:GetPropertyChangedSignal("LocalPlayer"):Wait()
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui", 10)
 
--- ระบบหาที่เก็บ UI แบบปลอดภัย (ป้องกันตัวรันเด้งออก)
-local success, protectedGui = pcall(function()
-    return CoreGui
-end)
+if not PlayerGui then return end
 
-if not success or not protectedGui then
-    protectedGui = LocalPlayer:WaitForChild("PlayerGui", 10)
+-- ลบ UI เก่าป้องกันการรันซ้ำ
+if PlayerGui:FindFirstChild("SimpleEggHub") then
+    PlayerGui:FindFirstChild("SimpleEggHub"):Destroy()
 end
 
-if protectedGui:FindFirstChild("EliteEggHubUI") then
-    protectedGui:FindFirstChild("EliteEggHubUI"):Destroy()
-end
-
--- แจ้งเตือนสถานะ
+-- แจ้งเตือนเมื่อโหลดสำเร็จ
 pcall(function()
     StarterGui:SetCore("SendNotification", {
-        Title = "✨ Elite Egg Hub",
+        Title = "Egg Hub",
         Text = "โหลดสคริปต์สำเร็จ!",
-        Duration = 3
+        Duration = 2
     })
 end)
 
-local CORRECT_KEY = "SPARK-EGGS-2026"
-local KEY_LINK = "https://oop280712-design.github.io/Key-script/"
+-- ตัวแปรตั้งค่า
+local autoSteal = false
 
-local VIP_USERS = {
-    ["Zorfije"] = true
-}
+-- สร้างหน้าต่าง UI แบบเรียบง่าย (ไม่กินสเปคตัวรัน)
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "SimpleEggHub"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.Parent = PlayerGui
 
-local Settings = {
-    SelectedTier = "Red/Gold",
-    TargetBoss = "All Bosses",
-    MyBaseCFrame = nil,
-    AutoRedNight = false,
-    IsStealing = false
-}
+local Frame = Instance.new("Frame")
+Frame.Size = UDim2.new(0, 220, 0, 150)
+Frame.Position = UDim2.new(0.05, 0, 0.3, 0)
+Frame.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+Frame.Active = true
+Frame.Draggable = true
+Frame.Parent = ScreenGui
 
-pcall(function()
-    if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        Settings.MyBaseCFrame = LocalPlayer.Character.HumanoidRootPart.CFrame
+Instance.new("UICorner", Frame).CornerRadius = UDim.new(0, 8)
+
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, 0, 0, 35)
+Title.Text = "🥚 EGG SNIPER HUB"
+Title.TextColor3 = Color3.fromRGB(255, 215, 0)
+Title.TextSize = 13
+Title.Font = Enum.Font.SourceSansBold
+Title.BackgroundTransparency = 1
+Title.Parent = Frame
+
+-- ปุ่มเปิด/ปิด Auto Steal
+local ToggleBtn = Instance.new("TextButton")
+ToggleBtn.Size = UDim2.new(0.88, 0, 0, 40)
+ToggleBtn.Position = UDim2.new(0.06, 0, 0, 45)
+ToggleBtn.BackgroundColor3 = Color3.fromRGB(192, 57, 43)
+ToggleBtn.Text = "AUTO STEAL: OFF"
+ToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleBtn.Font = Enum.Font.SourceSansBold
+ToggleBtn.TextSize = 13
+ToggleBtn.Parent = Frame
+Instance.new("UICorner", ToggleBtn).CornerRadius = UDim.new(0, 6)
+
+ToggleBtn.MouseButton1Click:Connect(function()
+    autoSteal = not autoSteal
+    if autoSteal then
+        ToggleBtn.Text = "AUTO STEAL: ON ✅"
+        ToggleBtn.BackgroundColor3 = Color3.fromRGB(46, 204, 113)
+    else
+        ToggleBtn.Text = "AUTO STEAL: OFF ❌"
+        ToggleBtn.BackgroundColor3 = Color3.fromRGB(192, 57, 43)
     end
 end)
 
-local function lightSpeedMove(targetCFrame)
-    pcall(function()
-        local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-        if hrp and targetCFrame then
-            hrp.CFrame = targetCFrame
-        end
-    end)
-end
+-- ปุ่มเทเลพอร์ต/ดึงไข่ด่วน
+local InstantBtn = Instance.new("TextButton")
+InstantBtn.Size = UDim2.new(0.88, 0, 0, 40)
+InstantBtn.Position = UDim2.new(0.06, 0, 0, 92)
+InstantBtn.BackgroundColor3 = Color3.fromRGB(41, 128, 185)
+InstantBtn.Text = "⚡ ขโมยไข่ใกล้ตัวทันที"
+InstantBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+InstantBtn.Font = Enum.Font.SourceSansBold
+InstantBtn.TextSize = 13
+InstantBtn.Parent = Frame
+Instance.new("UICorner", InstantBtn).CornerRadius = UDim.new(0, 6)
 
-local function scanEggs()
-    local matchedEggs = {}
+InstantBtn.MouseButton1Click:Connect(function()
     pcall(function()
         for _, obj in pairs(workspace:GetDescendants()) do
-            if obj:IsA("BasePart") or obj:IsA("Model") or obj:IsA("MeshPart") then
-                local name = obj.Name:lower()
-                local parentName = obj.Parent and obj.Parent.Name:lower() or ""
-                
-                if name:find("egg") or name:find("ไข่") or name:find("pod") then
-                    table.insert(matchedEggs, obj)
+            if obj:IsA("BasePart") and (obj.Name:lower():find("egg") or obj.Name:lower():find("ไข่")) then
+                local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                if hrp then
+                    hrp.CFrame = obj.CFrame + Vector3.new(0, 3, 0)
+                    break
                 end
             end
         end
     end)
-    return matchedEggs
-end
+end)
 
-local function executeInstantSteal()
-    if Settings.IsStealing then return end
-    local eggs = scanEggs()
-    
-    if #eggs > 0 then
-        Settings.IsStealing = true
-        local target = eggs[1]
-        local targetCFrame = target:IsA("Model") and target:GetPivot() or target.CFrame
-        
-        lightSpeedMove(targetCFrame + Vector3.new(0, 2, 0))
-        task.wait(0.05)
-        
-        pcall(function()
-            if target:IsA("BasePart") and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                target.CFrame = LocalPlayer.Character.HumanoidRootPart.CFrame
-            end
-        end)
-        
-        if Settings.MyBaseCFrame then
-            lightSpeedMove(Settings.MyBaseCFrame + Vector3.new(0, 3, 0))
+-- ลูปการทำงาน Auto Steal
+task.spawn(function()
+    while true do
+        task.wait(0.3)
+        if autoSteal then
+            pcall(function()
+                for _, obj in pairs(workspace:GetDescendants()) do
+                    if obj:IsA("BasePart") and (obj.Name:lower():find("egg") or obj.Name:lower():find("ไข่")) then
+                        local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                        if hrp then
+                            hrp.CFrame = obj.CFrame + Vector3.new(0, 2, 0)
+                            task.wait(0.1)
+                        end
+                    end
+                end
+            end)
         end
-        
-        Settings.IsStealing = false
-    end
-end
-
--- สร้างหน้าต่าง GUI
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "EliteEggHubUI"
-ScreenGui.ResetOnSpawn = false
-ScreenGui.Parent = protectedGui
-
--- 1. หน้าหลัก (Main Frame)
-local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 260, 0, 290)
-MainFrame.Position = UDim2.new(0.05, 0, 0.25, 0)
-MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 22)
-MainFrame.Active = true
-MainFrame.Draggable = true
-MainFrame.Visible = false
-MainFrame.Parent = ScreenGui
-
-Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 10)
-
-local MainTitle = Instance.new("TextLabel")
-MainTitle.Size = UDim2.new(1, 0, 0, 38)
-MainTitle.Text = "⚡ ELITE EGG SNIPER HUB"
-MainTitle.TextColor3 = Color3.fromRGB(102, 252, 241)
-MainTitle.TextSize = 13
-MainTitle.Font = Enum.Font.SourceSansBold
-MainTitle.BackgroundTransparency = 1
-MainTitle.Parent = MainFrame
-
-local TierBtn = Instance.new("TextButton")
-TierBtn.Size = UDim2.new(0.88, 0, 0, 34)
-TierBtn.Position = UDim2.new(0.06, 0, 0, 42)
-TierBtn.BackgroundColor3 = Color3.fromRGB(142, 68, 173)
-TierBtn.Text = "1. ระดับไข่: [ไข่แดง/ทอง]"
-TierBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-TierBtn.Font = Enum.Font.SourceSansBold
-TierBtn.TextSize = 12
-TierBtn.Parent = MainFrame
-Instance.new("UICorner", TierBtn).CornerRadius = UDim.new(0, 6)
-
-TierBtn.MouseButton1Click:Connect(function()
-    if Settings.SelectedTier == "Red/Gold" then
-        Settings.SelectedTier = "Boss/Bio"
-        TierBtn.Text = "1. ระดับไข่: [ไบโอม/บอส/Event]"
-    else
-        Settings.SelectedTier = "Red/Gold"
-        TierBtn.Text = "1. ระดับไข่: [ไข่แดง/ทอง]"
     end
 end)
 
-local StealBtn = Instance.new("TextButton")
-StealBtn.Size = UDim2.new(0.88, 0, 0, 42)
-StealBtn.Position = UDim2.new(0.06, 0, 0, 216)
-StealBtn.BackgroundColor3 = Color3.fromRGB(230, 126, 34)
-StealBtn.Text = "⚡ กดขโมยไข่ทันที (Light-Speed)"
-StealBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-StealBtn.Font = Enum.Font.SourceSansBold
-StealBtn.TextSize = 13
-StealBtn.Parent = MainFrame
-Instance.new("UICorner", StealBtn).CornerRadius = UDim.new(0, 8)
-
-StealBtn.MouseButton1Click:Connect(function()
-    executeInstantSteal()
-end)
-
--- 2. หน้าต่าง Key System Frame
-local KeyFrame = Instance.new("Frame")
-KeyFrame.Size = UDim2.new(0, 260, 0, 215)
-KeyFrame.Position = UDim2.new(0.05, 0, 0.3, 0)
-KeyFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 28)
-KeyFrame.Active = true
-KeyFrame.Draggable = true
-KeyFrame.Visible = false
-KeyFrame.Parent = ScreenGui
-
-Instance.new("UICorner", KeyFrame).CornerRadius = UDim.new(0, 10)
-
-local KeyTitle = Instance.new("TextLabel")
-KeyTitle.Size = UDim2.new(1, 0, 0, 38)
-KeyTitle.Text = "🔑 SECURE KEY SYSTEM"
-KeyTitle.TextColor3 = Color3.fromRGB(46, 204, 113)
-KeyTitle.TextSize = 12
-KeyTitle.Font = Enum.Font.SourceSansBold
-KeyTitle.BackgroundTransparency = 1
-KeyTitle.Parent = KeyFrame
-
-local KeyBox = Instance.new("TextBox")
-KeyBox.Size = UDim2.new(0.88, 0, 0, 38)
-KeyBox.Position = UDim2.new(0.06, 0, 0, 45)
-KeyBox.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
-KeyBox.PlaceholderText = "กรอก Key เพื่อปลดล็อกเมนู..."
-KeyBox.Text = ""
-KeyBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-KeyBox.Font = Enum.Font.SourceSans
-KeyBox.TextSize = 13
-KeyBox.Parent = KeyFrame
-Instance.new("UICorner", KeyBox).CornerRadius = UDim.new(0, 6)
-
-local GetKeyBtn = Instance.new("TextButton")
-GetKeyBtn.Size = UDim2.new(0.88, 0, 0, 36)
-GetKeyBtn.Position = UDim2.new(0.06, 0, 0, 92)
-GetKeyBtn.BackgroundColor3 = Color3.fromRGB(41, 128, 185)
-GetKeyBtn.Text = "📋 รับคีย์ (Get Key Link)"
-GetKeyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-GetKeyBtn.Font = Enum.Font.SourceSansBold
-GetKeyBtn.TextSize = 12
-GetKeyBtn.Parent = KeyFrame
-Instance.new("UICorner", GetKeyBtn).CornerRadius = UDim.new(0, 6)
-
-GetKeyBtn.MouseButton1Click:Connect(function()
-    pcall(function() setclipboard(KEY_LINK) end)
-    GetKeyBtn.Text = "✅ คัดลอกลิงก์สำเร็จ!"
-    task.wait(1.5)
-    GetKeyBtn.Text = "📋 รับคีย์ (Get Key Link)"
-end)
-
-local CheckKeyBtn = Instance.new("TextButton")
-CheckKeyBtn.Size = UDim2.new(0.88, 0, 0, 40)
-CheckKeyBtn.Position = UDim2.new(0.06, 0, 0, 138)
-CheckKeyBtn.BackgroundColor3 = Color3.fromRGB(46, 204, 113)
-CheckKeyBtn.Text = "🔓 ยืนยัน Key"
-CheckKeyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-CheckKeyBtn.Font = Enum.Font.SourceSansBold
-CheckKeyBtn.TextSize = 14
-CheckKeyBtn.Parent = KeyFrame
-Instance.new("UICorner", CheckKeyBtn).CornerRadius = UDim.new(0, 6)
-
-CheckKeyBtn.MouseButton1Click:Connect(function()
-    if KeyBox.Text == CORRECT_KEY then
-        KeyFrame.Visible = false
-        MainFrame.Visible = true
-    else
-        CheckKeyBtn.Text = "❌ Key ไม่ถูกต้อง!"
-        CheckKeyBtn.BackgroundColor3 = Color3.fromRGB(192, 57, 43)
-        task.wait(1.5)
-        CheckKeyBtn.Text = "🔓 ยืนยัน Key"
-        CheckKeyBtn.BackgroundColor3 = Color3.fromRGB(46, 204, 113)
-    end
-end)
-
--- เช็กชื่อ VIP หรือเปิดหน้า Key
-local username = LocalPlayer.Name
-local displayName = LocalPlayer.DisplayName
-
-if VIP_USERS[username] or VIP_USERS[displayName] then
-    MainFrame.Visible = true
-else
-    KeyFrame.Visible = true
-end
-
-print("Elite Egg Hub Loaded Successfully!")
+print("Simple Egg Hub Loaded!")
